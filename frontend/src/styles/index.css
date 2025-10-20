@@ -1,0 +1,375 @@
+@import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+/* =========================================================
+   🌿 Thème personnalisé "Farm Green"
+   Couleurs principales pour l'agriculture / gestion de ferme
+   ========================================================= */
+@layer base {
+  :root {
+    /* === Couleurs principales === */
+    --color-primary: #7bc47f; /* Vert principal doux */
+     --color-dd: #129619; /* Vert principal doux */
+    --color-primary-dark: #5ca464; /* Vert plus foncé */
+    --color-primary-light: #a7dca9; /* Vert clair */
+    
+    /* === Couleurs secondaires === */
+    --color-secondary: #f2f6eb; /* Fond naturel doux */
+    --color-accent: #e0f7d5; /* Vert d'accentuation / surlignage */
+    --color-warning: #facc15; /* Jaune naturel */
+    --color-error: #e53e3e; /* Rouge doux pour les erreurs */
+
+    /* === Couleurs de texte === */
+    --color-text: #2f3e2f;
+    --color-text-light: #4b6043;
+    --color-text-muted: #70806b;
+
+    /* === Composants === */
+    --color-button: var(--color-primary);
+    --color-button-hover: var(--color-primary-dark);
+    --color-input-bg: #f5f7f2;
+    --color-input-border: #c7d8c1;
+    --color-input-focus: var(--color-primary);
+
+    /* === Fond général === */
+    --color-background: var(--color-secondary);
+    --color-card-bg: #ffffff;
+  }
+
+  /* Appliquer la palette globale avec police moderne */
+  body {
+    background-color: var(--color-background);
+    color: var(--color-text);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+    font-weight: 400;
+    line-height: 1.6;
+    letter-spacing: -0.01em;
+  }
+
+  /* Styles typographiques spécifiques */
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+    font-weight: 600;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+  }
+
+  h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+  }
+
+  h2 {
+    font-size: 2rem;
+    font-weight: 600;
+  }
+
+  h3 {
+    font-size: 1.5rem;
+    font-weight: 600;
+  }
+
+  /* Textes plus petits */
+  .text-sm {
+    font-family: 'Inter', system-ui, sans-serif;
+    letter-spacing: 0.01em;
+  }
+
+  .text-xs {
+    font-family: 'Inter', system-ui, sans-serif;
+    letter-spacing: 0.02em;
+  }
+
+  /* Boutons */
+  button {
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+  }
+
+  input, textarea, select {
+    background-color: var(--color-input-bg);
+    border-color: var(--color-input-border);
+    color: var(--color-text);
+    font-family: 'Inter', system-ui, sans-serif;
+    font-weight: 400;
+    letter-spacing: 0.01em;
+  }
+
+  input:focus, textarea:focus, select:focus {
+    outline: none;
+    border-color: var(--color-input-focus);
+    box-shadow: 0 0 0 2px var(--color-primary-light);
+  }
+
+  /* Labels et texte de formulaire */
+  label {
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+  }
+}
+
+/* =========================================================
+   🌾 Animation Lazy (Fade-In / Apparition fluide)
+   ========================================================= */
+@layer utilities {
+  @keyframes lazy-fade {
+    0% {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .animate-lazy {
+    animation: lazy-fade 0.8s ease-out forwards;
+  }
+
+  .animate-lazy-slow {
+    animation: lazy-fade 1.5s ease-out forwards;
+  }
+
+  /* Classes utilitaires pour les polices */
+  .font-display {
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+  }
+
+  .font-body {
+    font-family: 'Inter', system-ui, sans-serif;
+    font-weight: 400;
+    letter-spacing: 0.01em;
+  }
+
+  .font-mono {
+    font-family: 'JetBrains Mono', 'Fira Code', monospace;
+    letter-spacing: -0.01em;
+  }
+}
+
+/* =========================================================
+   🌻 Composants réutilisables avec la palette
+   ========================================================= */
+@layer components {
+  .btn-primary {
+    background-color: var(--color-button);
+    color: white;
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    padding: 0.5rem 1rem;
+    border-radius: 0.75rem;
+    transition: background-color 0.2s;
+  }
+
+  .btn-primary:hover {
+    background-color: var(--color-button-hover);
+  }
+
+  .btn-secondary {
+    background-color: white;
+    border: 1px solid var(--color-input-border);
+    color: var(--color-text);
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    font-weight: 500;
+    border-radius: 0.75rem;
+    padding: 0.5rem 1rem;
+  }
+
+  .btn-secondary:hover {
+    background-color: var(--color-accent);
+  }
+
+  .card {
+    background-color: var(--color-card-bg);
+    border-radius: 1rem;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    padding: 1rem;
+    border: 1px solid var(--color-input-border);
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+
+  .card-title {
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+
+  .input {
+    border: 1px solid var(--color-input-border);
+    border-radius: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    width: 100%;
+    color: var(--color-text);
+    background-color: var(--color-input-bg);
+    font-family: 'Inter', system-ui, sans-serif;
+    font-weight: 400;
+  }
+
+  .input:focus {
+    outline: none;
+    border-color: var(--color-input-focus);
+    box-shadow: 0 0 0 2px var(--color-primary-light);
+  }
+
+  .lazy-container {
+    animation: lazy-fade 0.8s ease-out forwards;
+  }
+
+  /* Navigation et sidebar */
+  .sidebar-item {
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+  }
+
+  .sidebar-title {
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+}
+
+.login-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, var(--color-secondary) 0%, var(--color-accent) 100%);
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+}
+
+.login-card {
+  background: var(--color-card-bg);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--color-input-border);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+}
+
+.login-title {
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.login-subtitle {
+  font-family: 'Inter', system-ui, sans-serif;
+  font-weight: 400;
+  letter-spacing: 0.01em;
+}
+
+/* Animation pour le switch entre login/signup */
+.form-switch-enter {
+  opacity: 0;
+  transform: translateY(10px);
+}
+
+.form-switch-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.3s, transform 0.3s;
+}
+
+/* Responsive design */
+@media (max-width: 640px) {
+  .login-card {
+    margin: 1rem;
+    padding: 1.5rem;
+  }
+
+  h1 {
+    font-size: 2rem;
+  }
+
+  h2 {
+    font-size: 1.5rem;
+  }
+}
+
+/* =========================================================
+   🌿 Styles spécifiques pour le nouveau design de login
+   ========================================================= */
+
+/* Animation pour le logo */
+@keyframes logo-float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.logo-float {
+  animation: logo-float 3s ease-in-out infinite;
+}
+
+/* Styles pour les inputs plus grands */
+.input-lg {
+  padding: 1rem 1.5rem !important;
+  font-size: 1.125rem !important;
+  border-radius: 0.75rem !important;
+  font-family: 'Inter', system-ui, sans-serif !important;
+}
+
+/* Effet de glassmorphisme pour la section droite */
+.glass-effect {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Responsive design amélioré */
+@media (max-width: 1024px) {
+  .login-container {
+    flex-direction: column;
+  }
+  
+  .login-form-section {
+    padding: 2rem 1rem;
+  }
+}
+
+/* Animation d'entrée pour les éléments du formulaire */
+.form-element-enter {
+  opacity: 0;
+  transform: translateX(-20px);
+}
+
+.form-element-enter-active {
+  opacity: 1;
+  transform: translateX(0);
+  transition: opacity 0.5s, transform 0.5s;
+}
+
+/* Styles pour le dashboard et composants */
+.dashboard-title {
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+}
+
+.dashboard-subtitle {
+  font-family: 'Inter', system-ui, sans-serif;
+  font-weight: 400;
+  letter-spacing: 0.01em;
+}
+
+.stat-value {
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.stat-label {
+  font-family: 'Inter', system-ui, sans-serif;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
