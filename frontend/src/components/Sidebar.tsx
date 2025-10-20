@@ -63,7 +63,7 @@ const Sidebar: React.FC = () => {
       children: [
         {
           id: "vent",
-          label: "Vent",
+          label: "Vente",
           icon: <Package className="w-4 h-4" />,
           path: "/sale",
         },
