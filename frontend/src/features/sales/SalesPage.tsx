@@ -88,25 +88,6 @@ const SalesPage: React.FC = () => {
     }
   };
 
-  // TEST: Débogage des lots au chargement
-  useEffect(() => {
-    const testBatchRetrieval = async () => {
-      console.log('🧪 TEST: Début du test de récupération des lots...');
-      try {
-        const { getAllProductionBatches } = await import('../../services/saleService');
-        const batches = await getAllProductionBatches();
-        console.log('🧪 TEST: Lots récupérés:', batches);
-        console.log('🧪 TEST: Lot 11 existe?', batches.some(b => b.id === 11));
-        console.log('🧪 TEST: Lot 12 existe?', batches.some(b => b.id === 12));
-        console.log('🧪 TEST: Lot 5 existe?', batches.some(b => b.id === 5));
-      } catch (error) {
-        console.error('🧪 TEST: Erreur:', error);
-      }
-    };
-    
-    // Exécuter le test après un court délai
-    setTimeout(testBatchRetrieval, 1000);
-  }, []);
 
   // Filtrer les ventes par recherche et client
   const filteredSales = sales.filter(sale =>
@@ -160,9 +141,21 @@ const SalesPage: React.FC = () => {
         
         if (!batchExists) {
           // Récupérer tous les lots pour afficher ceux disponibles
-          const { getAllProductionBatches } = await import('../../services/saleService');
-          const allBatches = await getAllProductionBatches();
-          const availableBatchIds = allBatches.map(b => b.id);
+          // On caste le module en any pour éviter l'erreur TS si la fonction n'est pas exportée,
+          // puis on cherche une source de lots disponible (fonction exportée ou fallback local).
+          const mod: any = await import('../../services/saleService');
+          let allBatches: any[] = [];
+
+          if (typeof mod.getAllProductionBatches === 'function') {
+            allBatches = await mod.getAllProductionBatches();
+          }
+
+          // Fallback si la fonction n'existe pas ou ne renvoie rien utile
+          if ((!allBatches || allBatches.length === 0) && Array.isArray(availableBatches) && availableBatches.length > 0) {
+            allBatches = availableBatches;
+          }
+
+          const availableBatchIds = (allBatches || []).map((b: any) => b.id || b.batchId || 'unknown');
           
           throw new Error(`Le lot de production sélectionné (ID: ${item.productionBatchId}) n'existe pas en base de données. Lots disponibles: ${availableBatchIds.join(', ')}`);
         }
