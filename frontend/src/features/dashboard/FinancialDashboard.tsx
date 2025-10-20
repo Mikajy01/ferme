@@ -118,7 +118,7 @@ const SimpleFinancialChart: React.FC<{
               backgroundColor: type === 'line' 
                 ? 'rgba(16, 185, 129, 0.1)' 
                 : 'rgba(16, 185, 129, 0.8)',
-              borderWidth: type === 'line' ? 3 : 2,
+              borderWidth: type === 'line' ? 1 : 2,
               fill: type === 'line',
               tension: type === 'line' ? 0.4 : 0,
             },
@@ -129,7 +129,7 @@ const SimpleFinancialChart: React.FC<{
               backgroundColor: type === 'line' 
                 ? 'rgba(239, 68, 68, 0.1)' 
                 : 'rgba(239, 68, 68, 0.8)',
-              borderWidth: type === 'line' ? 3 : 2,
+              borderWidth: type === 'line' ? 1 : 2,
               fill: type === 'line',
               tension: type === 'line' ? 0.4 : 0,
             }
