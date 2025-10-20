@@ -205,11 +205,10 @@ const FinancialDashboard: React.FC = () => {
     recentTransactions,
     loading,
     error,
-    refreshAll,
   } = useFinancial();
 
-  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
-  const [chartType, setChartType] = useState<'line' | 'bar'>('line');
+  const [selectedYear] = useState(new Date().getFullYear());
+  const [chartType] = useState<'line' | 'bar'>('line');
 
   // Filtrer les transactions pour les 30 derniers jours
   const recentTransactionsData = recentTransactions.slice(0, 5);
@@ -251,44 +250,28 @@ const FinancialDashboard: React.FC = () => {
       
       <div className="flex-1 lg:ml-64 overflow-auto">
         {/* Header */}
-        <div className="bg-white shadow-sm border-b border-gray-200">
-          <div className="px-6 py-4">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900">Tableau de Bord Financier</h1>
-                <p className="text-gray-600 mt-1">
-                  Aperçu de vos finances et performances
-                </p>
+        <div className="flex-shrink-0 relative overflow-hidden bg-gradient-to-br from-green-400 via-emerald-600 to-emerald-800">
+          <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PHBhdGggZD0iTTM2IDE2YzAgMi4yMS0xLjc5IDQtNCA0cy00LTEuNzktNC00IDEuNzktNCA0LTQgNCAxLjc5IDQgNHoiLz48L2c+PC9nPjwvc3ZnPg==')] opacity-20 mix-blend-overlay"></div>
+
+          <div className="relative px-4 py-6 sm:px-6 md:px-8 lg:px-12">
+            <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6 text-center sm:text-left">
+              <div className="flex-shrink-0">
+                <div className="w-14 h-14 sm:w-16 sm:h-16 md:w-20 md:h-20 rounded-xl shadow-lg flex items-center justify-center transform hover:scale-105 transition-transform backdrop-blur-sm bg-white/10 border border-white/20">
+                  <img
+                    src="/src/assets/logo.png"
+                    alt="Logo"
+                    className="w-10 h-10 sm:w-12 sm:h-12 md:w-16 md:h-16 object-contain"
+                  />
+                </div>
               </div>
-              <div className="flex items-center gap-3 mt-4 sm:mt-0">
-                <select
-                  value={selectedYear}
-                  onChange={(e) => {
-                    setSelectedYear(Number(e.target.value));
-                    refreshAll(Number(e.target.value));
-                  }}
-                  className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-                >
-                  {[2023, 2024, 2025].map(year => (
-                    <option key={year} value={year}>{year}</option>
-                  ))}
-                </select>
-                <select
-                  value={chartType}
-                  onChange={(e) => setChartType(e.target.value as 'line' | 'bar')}
-                  className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-                >
-                  <option value="line">Courbes</option>
-                  <option value="bar">Barres</option>
-                </select>
-                <button
-                  onClick={() => refreshAll(selectedYear)}
-                  disabled={loading}
-                  className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 text-sm"
-                >
-                  <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
-                  Actualiser
-                </button>
+
+              <div className="flex-1">
+                <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-2 tracking-tight drop-shadow-md break-words">
+                  Tableau de Bord Financier
+                </h1>
+                <p className="text-sm sm:text-base md:text-lg text-emerald-50/90 max-w-xl leading-relaxed break-words">
+                   Aperçu de vos finances et performances
+                </p>
               </div>
             </div>
           </div>

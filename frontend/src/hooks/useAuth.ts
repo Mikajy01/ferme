@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { authService, type LoginCredentials, type User } from '../services/authService';
 
 interface UseAuthReturn {
@@ -11,11 +11,18 @@ interface UseAuthReturn {
 }
 
 export const useAuth = (): UseAuthReturn => {
-  const [user, setUser] = useState<User | null>(authService.getUser());
-  const [loading, setLoading] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-   const login = async (credentials: LoginCredentials): Promise<void> => {
+  useEffect(() => {
+    const existingUser = authService.getUser();
+    const hasToken = authService.isAuthenticated();
+    if (existingUser && hasToken) setUser(existingUser);
+    setLoading(false);
+  }, []);
+
+  const login = async (credentials: LoginCredentials): Promise<void> => {
     setLoading(true);
     setError('');
 
@@ -41,7 +48,7 @@ export const useAuth = (): UseAuthReturn => {
     user,
     login,
     logout,
-    isAuthenticated: authService.isAuthenticated(),
+    isAuthenticated: !!user,
     loading,
     error
   };
