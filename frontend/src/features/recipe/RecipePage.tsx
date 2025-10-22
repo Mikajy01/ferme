@@ -109,12 +109,12 @@ const RecipePage: React.FC = () => {
 
   // Produits finis pour le sélecteur
   const finishedProducts = products.filter(p => 
-    p.category === 'FINISHED_GOOD' || p.category === 'FEED'
+    p.category === 'FINISHED_GOOD'
   );
 
   // Ingrédients pour le sélecteur
   const ingredientProducts = products.filter(p => 
-    p.category === 'INGREDIENT' || p.category === 'FEED'
+    p.category === 'INGREDIENT'
   );
 
   const handleAddRecipe = async () => {
