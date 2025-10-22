@@ -479,7 +479,6 @@ const SalesPage: React.FC = () => {
                           </td>
                           <td className="p-4">
                             <span className="font-semibold text-green-600 flex items-center gap-1">
-                              <DollarSign size={16} />
                               {parseFloat(sale.totalAmount.toString()).toLocaleString()} Ar
                             </span>
                           </td>
