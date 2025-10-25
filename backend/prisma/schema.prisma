@@ -1,0 +1,264 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum ProductCategory {
+  AGRICULTURE
+  FEED
+  INGREDIENT
+  FINISHED_GOOD
+  ANIMAL
+}
+
+enum MovementType {
+  IN
+  OUT
+  SALE
+  ADJUST
+}
+
+enum FinancialType {
+  INCOME
+  EXPENSE
+}
+
+model User {
+  idUser    String   @id @default(uuid())
+  session   String   @unique
+  name      String
+  firstName String
+  password  String?
+  isActive  Boolean  @default(true)
+  role      String // "ADMIN", "USER", etc.
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Unit {
+  id                Int                @id @default(autoincrement())
+  code              String             @unique // "kg", "L", "pcs"
+  name              String
+  // éventuellement factor vers base unit
+  // back-relations
+  products          Product[]
+  recipeIngredients RecipeIngredient[]
+}
+
+model Product {
+  id                 Int                 @id @default(autoincrement())
+  name               String
+  sku                String?             @unique
+  category           ProductCategory
+  unitId             Int
+  unit               Unit                @relation(fields: [unitId], references: [id])
+  isSellable         Boolean             @default(false)
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+  // relations
+  purchaseItems      PurchaseItem[]
+  inventoryMovements InventoryMovement[]
+  recipeIngredients  RecipeIngredient[]
+  saleItems          SaleItem[]
+  batches            Batch[]
+  harvests            Harvest[]
+  productionOutputs  ProductionBatch[]   @relation("outputProduct")
+}
+
+model Purchase {
+  id                   Int                   @id @default(autoincrement())
+  supplier             String
+  date                 DateTime
+  totalAmount          Decimal               @db.Decimal(12, 2)
+  createdAt            DateTime              @default(now())
+  items                PurchaseItem[]
+  financialTransaction FinancialTransaction?
+}
+
+model PurchaseItem {
+  id         Int      @id @default(autoincrement())
+  purchaseId Int
+  purchase   Purchase @relation(fields: [purchaseId], references: [id])
+  productId  Int
+  product    Product  @relation(fields: [productId], references: [id])
+  quantity   Decimal  @db.Decimal(12, 4)
+  unitPrice  Decimal  @db.Decimal(12, 4) // prix unitaire
+  // batch is optional and owned by Batch via purchaseItemId
+  batch      Batch?
+}
+
+model Batch {
+  id                 Int                 @id @default(autoincrement())
+  productId          Int
+  product            Product             @relation(fields: [productId], references: [id])
+  // One-to-one (optional) link to the originating PurchaseItem
+  purchaseItem       PurchaseItem?       @relation(fields: [purchaseItemId], references: [id])
+  purchaseItemId     Int?                @unique
+  quantity           Decimal             @db.Decimal(12, 4) // quantite initiale du lot
+  remaining          Decimal             @db.Decimal(12, 4)
+  unitPrice          Decimal             @db.Decimal(12, 4)
+  receivedAt         DateTime
+  expiryDate         DateTime?
+  createdAt          DateTime            @default(now())
+  inventoryMovements InventoryMovement[]
+}
+
+model InventoryMovement {
+  id                Int              @id @default(autoincrement())
+  type              MovementType
+  productId         Int
+  product           Product          @relation(fields: [productId], references: [id])
+  batchId           Int?
+  batch             Batch?           @relation(fields: [batchId], references: [id])
+  // optional link to a production batch when movement is caused by production
+  productionBatchId Int?
+  productionBatch   ProductionBatch? @relation(fields: [productionBatchId], references: [id])
+  quantity          Decimal          @db.Decimal(12, 4) // positive always
+  date              DateTime         @default(now())
+  reference         String? // ex: "purchase:123", "production:45", "sale:789"
+  note              String?
+
+  animalEvents      AnimalEvent[]
+}
+
+model Recipe {
+  id          Int                @id @default(autoincrement())
+  name        String
+  description String?
+  createdAt   DateTime           @default(now())
+  ingredients RecipeIngredient[]
+  productions ProductionBatch[]
+}
+
+model RecipeIngredient {
+  id        Int     @id @default(autoincrement())
+  recipeId  Int
+  recipe    Recipe  @relation(fields: [recipeId], references: [id])
+  productId Int
+  product   Product @relation(fields: [productId], references: [id])
+  quantity  Decimal @db.Decimal(12, 4) // qty of ingredient per production unit
+  unitId    Int
+  unit      Unit    @relation(fields: [unitId], references: [id])
+}
+
+model ProductionBatch {
+  id                   Int                   @id @default(autoincrement())
+  recipeId             Int
+  recipe               Recipe                @relation(fields: [recipeId], references: [id])
+  outputProductId      Int
+  outputProduct        Product               @relation("outputProduct", fields: [outputProductId], references: [id])
+  outputQuantity       Decimal               @db.Decimal(12, 4)
+  date                 DateTime              @default(now())
+  // link consumed inventory by InventoryMovement with reference production:<id>
+  inventoryMovements   InventoryMovement[] // movements of OUT type referencing this production
+  // sales that reference a specific production batch
+  saleItems            SaleItem[]
+  // optional financial transaction associated to this production
+  financialTransaction FinancialTransaction?
+  costTotal            Decimal               @db.Decimal(12, 4) // computed cost
+}
+
+model Sale {
+  id                   Int                   @id @default(autoincrement())
+  customer             String?
+  date                 DateTime              @default(now())
+  totalAmount          Decimal               @db.Decimal(12, 2)
+  items                SaleItem[]
+  financialTransaction FinancialTransaction?
+}
+
+model SaleItem {
+  id                Int              @id @default(autoincrement())
+  saleId            Int
+  sale              Sale             @relation(fields: [saleId], references: [id])
+  productId         Int
+  product           Product          @relation(fields: [productId], references: [id])
+  productionBatchId Int?
+  productionBatch   ProductionBatch? @relation(fields: [productionBatchId], references: [id])
+  quantity          Decimal          @db.Decimal(12, 4)
+  unitPrice         Decimal          @db.Decimal(12, 4)
+}
+
+model FinancialTransaction {
+  id           Int              @id @default(autoincrement())
+  type         FinancialType
+  amount       Decimal          @db.Decimal(12, 2)
+  date         DateTime         @default(now())
+  note         String?
+  // optional relations to trace origin
+  purchaseId   Int?             @unique
+  purchase     Purchase?        @relation(fields: [purchaseId], references: [id])
+  saleId       Int?             @unique
+  sale         Sale?            @relation(fields: [saleId], references: [id])
+  productionId Int?             @unique
+  production   ProductionBatch? @relation(fields: [productionId], references: [id])
+}
+
+//
+// Optionnel : gestion d'animaux
+//
+model Animal {
+  id        Int           @id @default(autoincrement())
+  tag       String?       @unique
+  species   String
+  birthDate DateTime?
+  buyPrice  Decimal?      @db.Decimal(12, 2)
+  status    String        @default("alive") // sold, dead, etc.
+  events    AnimalEvent[]
+}
+
+model AnimalEvent {
+  id                 Int                @id @default(autoincrement())
+  animalId           Int
+  animal             Animal             @relation(fields: [animalId], references: [id])
+  type               String             // "feed", "sale", "vet", "birth", etc.
+  date               DateTime           @default(now())
+  note               String?
+  cost               Decimal?           @db.Decimal(12, 2)
+
+  // 🔗 Nouveau : lien vers InventoryMovement
+  inventoryMovementId Int?
+  inventoryMovement   InventoryMovement? @relation(fields: [inventoryMovementId], references: [id])
+}
+
+model Culture {
+  id           Int               @id @default(autoincrement())
+  name         String
+  startDate    DateTime          @default(now())
+  endDate      DateTime?
+  status       String            @default("ongoing") // ongoing, harvested, cancelled, etc.
+  area         Decimal?          @db.Decimal(12,2)
+  note         String?
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+
+  // relations
+  events       CultureEvent[]
+  harvests     Harvest[]
+}
+
+model CultureEvent {
+  id          Int       @id @default(autoincrement())
+  cultureId   Int
+  culture     Culture   @relation(fields: [cultureId], references: [id])
+  type        String    // "seeding", "watering", "fertilization", "weeding", "harvest", etc.
+  date        DateTime  @default(now())
+  description String?
+  cost        Decimal  @db.Decimal(12, 2)
+}
+
+
+model Harvest {
+  id         Int       @id @default(autoincrement())
+  cultureId  Int
+  culture    Culture   @relation(fields: [cultureId], references: [id])
+  productId  Int
+  product    Product   @relation(fields: [productId], references: [id])
+  quantity   Decimal   @db.Decimal(12,4)
+  date       DateTime  @default(now())
+  note       String?
+}

@@ -1,0 +1,20 @@
+import { Module } from '@nestjs/common';
+import { UnitsModule } from '../units/units.module';
+import { PrismaModule } from 'src/providers/prisma/prisma.module';
+import { PrismaProductsRepository } from './repositories/prisma-product.repository';
+import { ProductsService } from './services/products.service';
+import { ProductsController } from './controllers/products.controller';
+
+@Module({
+  imports: [PrismaModule, UnitsModule],
+  controllers: [ProductsController],
+  providers: [
+    ProductsService,
+    {
+      provide: 'IProductRepository',
+      useClass: PrismaProductsRepository,
+    },
+  ],
+  exports: [ProductsService, 'IProductRepository'],
+})
+export class ProductsModule {}
