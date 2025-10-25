@@ -253,8 +253,8 @@ const UsersPage: React.FC = () => {
               {/* Informations */}
               <div className="space-y-3 mb-4">
                 <div className="flex items-center gap-2 text-[var(--color-text-muted)] font-body text-sm">
-                  <Mail size={16} />
-                  <span className="truncate">{user.session}@ferme.mg</span>
+                  <User size={16} />
+                  <span className="truncate">Session : {user.session}</span>
                 </div>
                 <div className="flex items-center gap-2 text-[var(--color-text-muted)] font-body text-sm">
                   <Shield size={16} />

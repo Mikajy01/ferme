@@ -38,7 +38,7 @@ export const useFinancial = (): UseFinancialReturn => {
       setLoading(true);
       setError('');
 
-      console.log('🔄 Chargement des transactions...');
+      ;
       const data = await financialService.getAllTransactions(startDate, endDate);
       setTransactions(data);
 
@@ -55,7 +55,7 @@ export const useFinancial = (): UseFinancialReturn => {
   // Charger le solde
   const refreshBalance = useCallback(async (startDate?: string, endDate?: string) => {
     try {
-      console.log('🔄 Chargement du solde...');
+      ;
       const data = await financialService.getBalance(startDate, endDate);
       setBalance(data);
 
@@ -70,7 +70,7 @@ export const useFinancial = (): UseFinancialReturn => {
   // Charger le résumé mensuel
   const refreshMonthlySummary = useCallback(async (year: number) => {
     try {
-      console.log('🔄 Chargement du résumé mensuel...');
+      ;
       const data = await financialService.getMonthlySummary(year);
       setMonthlySummary(data);
 
@@ -85,7 +85,7 @@ export const useFinancial = (): UseFinancialReturn => {
   // Charger les transactions récentes
   const refreshRecentTransactions = useCallback(async (limit: number = 10) => {
     try {
-      console.log('🔄 Chargement des transactions récentes...');
+      ;
       const data = await financialService.getRecentTransactions(limit);
       setRecentTransactions(data);
 
@@ -105,7 +105,7 @@ export const useFinancial = (): UseFinancialReturn => {
 
       const currentYear = year || new Date().getFullYear();
       
-      console.log('🔄 Chargement de toutes les données financières...');
+      ;
       
       await Promise.all([
         refreshTransactions(),
@@ -114,7 +114,7 @@ export const useFinancial = (): UseFinancialReturn => {
         refreshRecentTransactions(5),
       ]);
 
-      console.log('✅ Toutes les données financières chargées');
+      ;
 
     } catch (err) {
       console.error('❌ Erreur chargement données financières:', err);

@@ -41,9 +41,9 @@ export const useSales = (): UseSalesReturn => {
       setLoading(true);
       setError('');
 
-      console.log('🔄 Chargement des ventes...');
+      ;
       const data = await saleService.getAllSales();
-      console.log('✅ Ventes chargées:', data);
+      ;
       setSales(data || []);
 
     } catch (err) {
@@ -60,9 +60,9 @@ export const useSales = (): UseSalesReturn => {
   // Charger les produits
   const loadProducts = useCallback(async () => {
     try {
-      console.log('🔄 Chargement des produits...');
+      ;
       const data = await saleService.getSellableProducts();
-      console.log('✅ Produits chargés:', data);
+      ;
       setProducts(data || []);
 
     } catch (err) {
@@ -76,9 +76,9 @@ export const useSales = (): UseSalesReturn => {
   // Charger les unités
   const loadUnits = useCallback(async () => {
     try {
-      console.log('🔄 Chargement des unités...');
+      ;
       const data = await saleService.getUnits();
-      console.log('✅ Unités chargées:', data);
+      ;
       setUnits(data || []);
 
     } catch (err) {
@@ -98,10 +98,10 @@ export const useSales = (): UseSalesReturn => {
       }
 
       setAvailableBatchesLoading(true);
-      console.log(`🔄 Chargement des lots disponibles pour produit ${productId}...`);
+      ;
       
       const batches = await saleService.getAvailableBatches(productId);
-      console.log(`✅ Lots disponibles chargés pour produit ${productId}:`, batches);
+      ;
       
       setAvailableBatches(batches || []);
 
@@ -116,9 +116,9 @@ export const useSales = (): UseSalesReturn => {
   // Vérifier si un produit existe
   const checkProductExists = async (productId: number): Promise<boolean> => {
     try {
-      console.log(`🔍 Vérification existence produit ${productId}...`);
+      ;
       const exists = await saleService.checkProductExists(productId);
-      console.log(`✅ Produit ${productId} existe:`, exists);
+      ;
       return exists;
     } catch (error) {
       console.error(`❌ Erreur vérification produit ${productId}:`, error);
@@ -129,9 +129,9 @@ export const useSales = (): UseSalesReturn => {
   // Vérifier si un lot existe
   const checkBatchExists = async (batchId: number): Promise<boolean> => {
     try {
-      console.log(`🔍 Vérification existence lot ${batchId}...`);
+      ;
       const exists = await saleService.checkBatchExists(batchId);
-      console.log(`✅ Lot ${batchId} existe:`, exists);
+      ;
       return exists;
     } catch (error) {
       console.error(`❌ Erreur vérification lot ${batchId}:`, error);
@@ -142,9 +142,9 @@ export const useSales = (): UseSalesReturn => {
   // Récupérer un lot par ID
   const getBatchById = async (batchId: number): Promise<ProductionBatch | null> => {
     try {
-      console.log(`🔍 Récupération du lot ${batchId}...`);
+      ;
       const batch = await saleService.getBatchById(batchId);
-      console.log(`✅ Lot ${batchId} récupéré:`, batch);
+      ;
       return batch;
     } catch (error) {
       console.error(`❌ Erreur récupération lot ${batchId}:`, error);
@@ -163,7 +163,7 @@ export const useSales = (): UseSalesReturn => {
       setCreating(true);
       setError('');
 
-      console.log('🆕 Création vente:', JSON.stringify(data, null, 2));
+      ;
       
       // Validation supplémentaire côté client
       if (!data.customer?.trim()) {
@@ -191,11 +191,11 @@ export const useSales = (): UseSalesReturn => {
           throw new Error(`Article ${itemNumber}: Prix unitaire invalide (${item.unitPrice})`);
         }
         
-        console.log(`✅ Article ${itemNumber} validé:`, item);
+        ;
       });
 
       const result = await saleService.createSale(data);
-      console.log('✅ Vente créée avec succès:', result);
+      ;
 
       // Recharger les ventes
       await loadSales();
@@ -218,9 +218,9 @@ export const useSales = (): UseSalesReturn => {
       setDeleting(true);
       setError('');
 
-      console.log(`🗑️ Suppression vente ${id}...`);
+      ;
       await saleService.deleteSale(id);
-      console.log('✅ Vente supprimée avec succès');
+      ;
 
       // Recharger les ventes
       await loadSales();

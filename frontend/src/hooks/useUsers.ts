@@ -53,10 +53,10 @@ export const useUsers = (): UseUsersReturn => {
       setLoading(true);
       setError('');
       
-      console.log('🔄 Chargement avec filtres:', filters);
+      ;
       const response = await userService.getUsers(filters);
       
-      console.log('✅ Données reçues:', response);
+      ;
       setUsers(response.data);
       setCurrentPage(response.page);
       setTotalPages(response.totalPages);

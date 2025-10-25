@@ -30,9 +30,9 @@ export const usePurchases = (): UsePurchasesReturn => {
       setLoading(true);
       setError('');
       
-      console.log('🔄 Chargement des achats...');
+      ;
       const data = await purchaseService.getAll();
-      console.log('✅ Achats chargés:', data);
+      ;
       setPurchases(data || []);
       
     } catch (err) {
@@ -57,9 +57,9 @@ export const usePurchases = (): UsePurchasesReturn => {
       setCreating(true);
       setError('');
       
-      console.log('🆕 Création achat:', data);
+      ;
       const newPurchase = await purchaseService.create(data);
-      console.log('✅ Achat créé:', newPurchase);
+      ;
       
       setPurchases(prev => [newPurchase, ...prev]);
       notificationService.success('Achat créé avec succès');

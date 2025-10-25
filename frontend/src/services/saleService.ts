@@ -145,8 +145,8 @@ export const saleService = {
   // Créer une vente - VERSION AVEC DÉBOGAGE COMPLET
   createSale: async (data: CreateSaleDto): Promise<FinancialTransaction> => {
     try {
-      console.log('🚀 DEBUT - Création de vente');
-      console.log('📦 Données envoyées pour création vente:', JSON.stringify(data, null, 2));
+      ;
+      ;
       
       // Validation des données avant envoi
       if (!data.customer || !data.date || !data.items || data.items.length === 0) {
@@ -178,17 +178,17 @@ export const saleService = {
         }
       });
 
-      console.log('📤 Envoi de la requête à l\'API...');
+      ;
       const response = await fetchWithAuth(`${API_BASE_URL}/sales`, {
         method: "POST",
         body: JSON.stringify(data),
       });
 
-      console.log('📥 Réponse reçue - Status:', response.status);
+      ;
 
       if (response.status === 201) {
         const result = await response.json();
-        console.log('✅ Vente créée avec succès:', result);
+        ;
         return result;
       }
 
@@ -252,7 +252,7 @@ export const saleService = {
   // Récupérer TOUS les lots de production - VERSION CORRIGÉE
   getAllProductionBatches: async (): Promise<ProductionBatch[]> => {
     try {
-      console.log('🔄 Récupération de tous les lots de production depuis /api/production...');
+      ;
       const response = await fetchWithAuth(`${API_BASE_URL}/production`);
       
       if (!response.ok) {
@@ -260,7 +260,7 @@ export const saleService = {
       }
       
       const batches = await response.json();
-      console.log('✅ Réponse brute de l\'API:', batches);
+      ;
       
       // Vérifier que batches est un tableau
       if (!Array.isArray(batches)) {
@@ -268,13 +268,13 @@ export const saleService = {
         return [];
       }
       
-      console.log(`📊 Nombre de lots récupérés: ${batches.length}`);
-      console.log(`📋 IDs des lots:`, batches.map((b: any) => b.id));
+      ;
+      ;
       
       // Formater les données pour correspondre à l'interface ProductionBatch
       const formattedBatches = batches.map((batch: any) => {
         try {
-          console.log(`🔧 Formatage du lot ${batch.id}...`);
+          ;
           
           const formattedBatch: ProductionBatch = {
             id: batch.id,
@@ -292,7 +292,7 @@ export const saleService = {
               parseFloat(batch.costTotal) / parseFloat(batch.outputQuantity) : 0
           };
           
-          console.log(`✅ Lot ${batch.id} formaté:`, formattedBatch);
+          ;
           return formattedBatch;
         } catch (formatError) {
           console.error(`❌ Erreur formatage lot ${batch.id}:`, batch, formatError);
@@ -300,7 +300,7 @@ export const saleService = {
         }
       }).filter((batch): batch is ProductionBatch => batch !== null);
       
-      console.log('✅ Lots formatés finaux:', formattedBatches);
+      ;
       return formattedBatches;
 
     } catch (error) {
@@ -312,21 +312,21 @@ export const saleService = {
   // Récupérer les lots disponibles pour un produit spécifique - VERSION CORRIGÉE
   getAvailableBatches: async (productId: number): Promise<ProductionBatch[]> => {
     try {
-      console.log(`🔄 Récupération des lots disponibles pour produit ${productId}...`);
+      ;
       
       // Récupérer tous les lots depuis /api/production
       const allBatches = await saleService.getAllProductionBatches();
       
-      console.log(`📊 Total des lots à filtrer: ${allBatches.length}`);
+      ;
       
       // Filtrer les lots pour le produit spécifié
       const batchesForProduct = allBatches.filter(batch => {
         const matches = batch.outputProductId === productId;
-        console.log(`🔍 Lot ${batch.id} - Produit: ${batch.outputProductId}, Recherché: ${productId}, Match: ${matches}`);
+        ;
         return matches;
       });
       
-      console.log(`✅ Lots disponibles pour produit ${productId}:`, batchesForProduct.map(b => b.id));
+      ;
       return batchesForProduct;
 
     } catch (error) {
@@ -344,10 +344,10 @@ export const saleService = {
   // Vérifier si un produit existe
   checkProductExists: async (productId: number): Promise<boolean> => {
     try {
-      console.log(`🔍 Vérification existence produit ${productId}...`);
+      ;
       const response = await fetchWithAuth(`${API_BASE_URL}/products/${productId}`);
       const exists = response.status === 200;
-      console.log(`✅ Produit ${productId} existe:`, exists);
+      ;
       return exists;
     } catch (error) {
       console.error(`❌ Erreur vérification produit ${productId}:`, error);
@@ -358,25 +358,25 @@ export const saleService = {
   // Vérifier si un lot existe - VERSION CORRIGÉE
   checkBatchExists: async (batchId: number): Promise<boolean> => {
     try {
-      console.log(`🔍 Vérification existence lot ${batchId}...`);
+      ;
       
       // Récupérer tous les lots et vérifier si l'ID existe
       const allBatches = await saleService.getAllProductionBatches();
-      console.log(`📊 Total des lots récupérés: ${allBatches.length}`);
-      console.log(`📋 IDs des lots:`, allBatches.map(b => b.id));
+      ;
+      ;
       
       const exists = allBatches.some(batch => {
         const match = batch.id === batchId;
         if (match) {
-          console.log(`🎯 Lot ${batchId} TROUVÉ !`);
+          ;
         }
         return match;
       });
       
-      console.log(`✅ Lot ${batchId} existe:`, exists);
+      ;
       
       if (!exists) {
-        console.log(`❌ Lot ${batchId} NON TROUVÉ dans la liste des lots`);
+        ;
       }
       
       return exists;
@@ -390,12 +390,12 @@ export const saleService = {
   // NOUVELLE MÉTHODE: Récupérer un lot spécifique par ID
   getBatchById: async (batchId: number): Promise<ProductionBatch | null> => {
     try {
-      console.log(`🔍 Récupération du lot ${batchId}...`);
+      ;
       
       const allBatches = await saleService.getAllProductionBatches();
       const batch = allBatches.find(b => b.id === batchId);
       
-      console.log(`✅ Lot ${batchId} récupéré:`, batch);
+      ;
       return batch || null;
 
     } catch (error) {

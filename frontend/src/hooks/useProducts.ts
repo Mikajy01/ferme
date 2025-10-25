@@ -53,11 +53,11 @@ export const useProducts = (): UseProductsReturn => {
       setLoading(true);
       setError('');
       
-      console.log('🔄 Chargement des produits avec filtres:', currentFilters);
+      ;
       
       const response = await productService.getAll(currentFilters);
       
-      console.log('📦 Réponse formatée:', response);
+      ;
       
       setProducts(response.data);
       setCurrentPage(response.page);
@@ -91,7 +91,7 @@ export const useProducts = (): UseProductsReturn => {
         try {
           const stock = await productService.getStock(product.id);
           stocks[product.id] = stock;
-          console.log(`📊 Stock produit ${product.id}: ${stock}`);
+          ;
         } catch (err) {
           console.warn(`❌ Erreur stock produit ${product.id}:`, err);
           stocks[product.id] = 0;

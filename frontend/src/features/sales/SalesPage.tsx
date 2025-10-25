@@ -120,15 +120,15 @@ const SalesPage: React.FC = () => {
 
     try {
       // VÉRIFICATION DES IDS AVANT ENVOI - VERSION SIMPLIFIÉE
-      console.log('🔍 Vérification des IDs avant création de vente...');
-      console.log('📦 Articles à vérifier:', newSale.items);
+      ;
+      ;
       
       for (const item of newSale.items) {
-        console.log(`🔍 Vérification de l'article:`, item);
+        ;
         
         // Vérifier le produit
         const productExists = await checkProductExists(item.productId);
-        console.log(`✅ Produit ${item.productId} existe: ${productExists}`);
+        ;
         
         if (!productExists) {
           const product = products.find(p => p.id === item.productId);
@@ -137,7 +137,7 @@ const SalesPage: React.FC = () => {
 
         // Vérifier le lot
         const batchExists = await checkBatchExists(item.productionBatchId);
-        console.log(`✅ Lot ${item.productionBatchId} existe: ${batchExists}`);
+        ;
         
         if (!batchExists) {
           // Récupérer tous les lots pour afficher ceux disponibles
@@ -173,7 +173,7 @@ const SalesPage: React.FC = () => {
         }))
       };
 
-      console.log('📦 Données de vente préparées:', saleData);
+      ;
       await createSale(saleData);
       
       // Réinitialiser le formulaire

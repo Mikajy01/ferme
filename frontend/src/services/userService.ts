@@ -119,11 +119,11 @@ export const userService = {
       queryParams.append('limit', filters.limit.toString());
     }
 
-    console.log('🔍 Appel API avec URL:', `${API_BASE_URL}/users?${queryParams.toString()}`);
+    ;
     
     const response = await fetchWithAuth(`${API_BASE_URL}/users?${queryParams.toString()}`);
     const data = await response.json();
-    console.log('📦 Données reçues:', data);
+    ;
     return data;
   },
 

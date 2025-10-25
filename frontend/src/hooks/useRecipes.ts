@@ -54,9 +54,9 @@ export const useRecipes = (): UseRecipesReturn => {
       setLoading(true);
       setError('');
 
-      console.log('🔄 Chargement des recettes...');
+      ;
       const data = await recipeService.getAllRecipes();
-      console.log('✅ Recettes chargées:', data);
+      ;
       setRecipes(data || []);
 
     } catch (err) {
@@ -73,9 +73,9 @@ export const useRecipes = (): UseRecipesReturn => {
   // Charger les lots de production
   const loadProductionBatches = useCallback(async () => {
     try {
-      console.log('🔄 Chargement des lots de production...');
+      ;
       const data = await recipeService.getAllProductionBatches();
-      console.log('✅ Lots de production chargés:', data);
+      ;
       setProductionBatches(data || []);
 
     } catch (err) {
@@ -89,9 +89,9 @@ export const useRecipes = (): UseRecipesReturn => {
   // Charger les produits
   const loadProducts = useCallback(async () => {
     try {
-      console.log('🔄 Chargement des produits...');
+      ;
       const data = await recipeService.getProducts();
-      console.log('✅ Produits chargés:', data);
+      ;
       setProducts(data || []);
 
     } catch (err) {
@@ -105,9 +105,9 @@ export const useRecipes = (): UseRecipesReturn => {
   // Charger les unités
   const loadUnits = useCallback(async () => {
     try {
-      console.log('🔄 Chargement des unités...');
+      ;
       const data = await recipeService.getUnits();
-      console.log('✅ Unités chargées:', data);
+      ;
       setUnits(data || []);
 
     } catch (err) {
@@ -144,9 +144,9 @@ export const useRecipes = (): UseRecipesReturn => {
       setCreatingRecipe(true);
       setError('');
 
-      console.log('🆕 Création recette:', data);
+      ;
       const newRecipe = await recipeService.createRecipe(data);
-      console.log('✅ Recette créée:', newRecipe);
+      ;
 
       setRecipes(prev => [...prev, newRecipe]);
       notificationService.success('Recette créée avec succès');
@@ -178,9 +178,9 @@ export const useRecipes = (): UseRecipesReturn => {
       setCreatingProduction(true);
       setError('');
 
-      console.log('🏭 Création lot production:', data);
+      ;
       const newBatch = await recipeService.createProductionBatch(data);
-      console.log('✅ Lot production créé:', newBatch);
+      ;
 
       setProductionBatches(prev => [newBatch, ...prev]);
       notificationService.success('Lot de production créé avec succès');

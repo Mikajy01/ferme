@@ -176,11 +176,11 @@ getAll: async (filters: ProductsFilters = {}): Promise<ProductsResponse> => {
   const queryString = queryParams.toString();
   const url = queryString ? `${API_BASE_URL}/products?${queryString}` : `${API_BASE_URL}/products`;
   
-  console.log('📡 Requête produits:', url);
+  ;
   const response = await fetchWithAuth(url);
   const responseData = await response.json();
   
-  console.log('📦 Réponse brute de l\'API:', responseData);
+  ;
   
   // Votre API retourne directement un tableau
   if (Array.isArray(responseData)) {

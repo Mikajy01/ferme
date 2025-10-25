@@ -27,9 +27,9 @@ export const useUnits = (): UseUnitsReturn => {
       setLoading(true);
       setError('');
       
-      console.log('🔄 Chargement des unités...');
+      ;
       const data = await unitService.getAll();
-      console.log('✅ Unités chargées:', data);
+      ;
       setUnits(data || []);
       
     } catch (err) {
@@ -54,9 +54,9 @@ export const useUnits = (): UseUnitsReturn => {
       setCreating(true);
       setError('');
       
-      console.log('🆕 Création unité:', data);
+      ;
       const newUnit = await unitService.create(data);
-      console.log('✅ Unité créée:', newUnit);
+      ;
       
       // Correction : S'assurer que newUnit est bien de type Unit
       setUnits(prev => [...prev, newUnit as unknown as Unit]);

@@ -49,9 +49,9 @@ export const useCultures = (): UseCulturesReturn => {
       setLoading(true);
       setError('');
 
-      console.log('🔄 Chargement des cultures...');
+      ;
       const data = await cultureService.getAll();
-      console.log('✅ Cultures chargées:', data);
+      ;
       setCultures(data || []);
 
     } catch (err) {
@@ -68,9 +68,9 @@ export const useCultures = (): UseCulturesReturn => {
   // Charger les lots
   const loadBatches = useCallback(async () => {
     try {
-      console.log('🔄 Chargement des lots...');
+      ;
       const data = await cultureService.getBatches();
-      console.log('✅ Lots chargés:', data);
+      ;
       setBatches(data || []);
 
     } catch (err) {
@@ -97,9 +97,9 @@ export const useCultures = (): UseCulturesReturn => {
       setCreating(true);
       setError('');
 
-      console.log('🆕 Création culture:', data);
+      ;
       const newCulture = await cultureService.create(data);
-      console.log('✅ Culture créée:', newCulture);
+      ;
 
       setCultures(prev => [...prev, newCulture]);
       notificationService.success('Culture créée avec succès');
@@ -122,11 +122,11 @@ const updateCulture = async (id: number, data: Partial<CreateCultureDto>): Promi
     setUpdating(true);
     setError('');
 
-    console.log('📝 Mise à jour culture:', id, data);
+    ;
     
     // CORRECTION: Ne pas convertir area ici, laisser le service gérer le format
     const updatedCulture = await cultureService.update(id, data);
-    console.log('✅ Culture mise à jour:', updatedCulture);
+    ;
 
     setCultures(prev =>
       prev.map(culture => (culture.id === id ? updatedCulture : culture))
@@ -150,9 +150,9 @@ const updateCulture = async (id: number, data: Partial<CreateCultureDto>): Promi
       setUpdating(true);
       setError('');
 
-      console.log('🗑️ Suppression culture:', id);
+      ;
       const deletedCulture = await cultureService.delete(id);
-      console.log('✅ Culture supprimée:', deletedCulture);
+      ;
 
       setCultures(prev => prev.filter(culture => culture.id !== id));
       notificationService.success('Culture supprimée avec succès');
@@ -174,9 +174,9 @@ const updateCulture = async (id: number, data: Partial<CreateCultureDto>): Promi
       setHarvesting(true);
       setError('');
 
-      console.log('🌾 Création récolte:', data);
+      ;
       const result = await cultureService.createHarvest(data);
-      console.log('✅ Récolte enregistrée:', result);
+      ;
 
       // Recharger les cultures pour mettre à jour les récoltes
       await loadCultures();
@@ -201,9 +201,9 @@ const updateCulture = async (id: number, data: Partial<CreateCultureDto>): Promi
     try {
       setError('');
 
-      console.log('🆕 Création événement culture:', data);
+      ;
       const newEvent = await cultureService.createEvent(data);
-      console.log('✅ Événement créé:', newEvent);
+      ;
 
       // Mettre à jour la culture avec le nouvel événement
       setCultures(prev =>
@@ -235,9 +235,9 @@ const updateCulture = async (id: number, data: Partial<CreateCultureDto>): Promi
       setSeeding(true);
       setError('');
 
-      console.log('🌱 Semis/Application:', data);
+      ;
       const result = await cultureService.seed(data);
-      console.log('✅ Semis/Application effectué:', result);
+      ;
 
       // Recharger les cultures pour mettre à jour les événements
       await loadCultures();

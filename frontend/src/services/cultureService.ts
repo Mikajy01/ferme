@@ -190,7 +190,7 @@ update: async (id: number, data: Partial<CreateCultureDto>): Promise<Culture> =>
     if (data.status !== undefined) formattedData.status = data.status;
     if (data.note !== undefined) formattedData.note = data.note;
 
-    console.log('📝 Données formatées pour mise à jour:', formattedData);
+    ;
 
     // CORRECTION: Utiliser la bonne URL - votre erreur montre /api/cultures mais vos autres endpoints sont /cultures
     const response = await fetchWithAuth(`${API_BASE_URL}/cultures/${id}`, {

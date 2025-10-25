@@ -99,11 +99,11 @@ export const financialService = {
         url += `?${params.toString()}`;
       }
 
-      console.log('🔄 Récupération des transactions financières...');
+      ;
       const response = await fetchWithAuth(url);
       const transactions = await response.json();
       
-      console.log('✅ Transactions récupérées:', transactions);
+      ;
       return transactions.map((transaction: any) => ({
         ...transaction,
         amount: parseFloat(transaction.amount),
@@ -128,11 +128,11 @@ export const financialService = {
         url += `?${params.toString()}`;
       }
 
-      console.log('🔄 Récupération du solde financier...');
+      ;
       const response = await fetchWithAuth(url);
       const balance = await response.json();
       
-      console.log('✅ Solde récupéré:', balance);
+      ;
       return {
         ...balance,
         income: parseFloat(balance.income),
@@ -148,11 +148,11 @@ export const financialService = {
   // Récupérer le résumé mensuel
   getMonthlySummary: async (year: number): Promise<MonthlySummary[]> => {
     try {
-      console.log(`🔄 Récupération du résumé mensuel pour ${year}...`);
+      ;
       const response = await fetchWithAuth(`${API_BASE_URL}/financial/monthly/${year}`);
       const monthlyData = await response.json();
       
-      console.log('✅ Résumé mensuel récupéré:', monthlyData);
+      ;
       return monthlyData.map((month: any) => ({
         ...month,
         income: parseFloat(month.income),
@@ -167,13 +167,13 @@ export const financialService = {
   // Récupérer les transactions récentes (limitées)
   getRecentTransactions: async (limit: number = 10): Promise<FinancialTransaction[]> => {
     try {
-      console.log(`🔄 Récupération des ${limit} dernières transactions...`);
+      ;
       const allTransactions = await financialService.getAllTransactions();
       const recentTransactions = allTransactions
         .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
         .slice(0, limit);
       
-      console.log('✅ Transactions récentes récupérées:', recentTransactions);
+      ;
       return recentTransactions;
     } catch (error) {
       console.error('❌ Erreur récupération transactions récentes:', error);

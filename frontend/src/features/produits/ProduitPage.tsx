@@ -72,7 +72,7 @@ const categories = ['Tous', 'AGRICULTURE', 'FEED', 'INGREDIENT', 'FINISHED_GOOD'
       newFilters.category = selectedCategory;
     }
     
-    console.log('🔄 Mise à jour des filtres:', newFilters);
+    ;
     setFilters(newFilters);
   }, 500);
   
@@ -92,7 +92,7 @@ const categories = ['Tous', 'AGRICULTURE', 'FEED', 'INGREDIENT', 'FINISHED_GOOD'
       newFilters.category = selectedCategory;
     }
 
-    console.log('🔄 Mise à jour des filtres:', newFilters);
+    ;
     setFilters(newFilters);
   }, 500);
   

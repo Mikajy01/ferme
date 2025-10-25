@@ -42,9 +42,9 @@ export const useAnimals = (): UseAnimalsReturn => {
       setLoading(true);
       setError('');
       
-      console.log('🔄 Chargement des animaux...');
+      ;
       const data = await animalService.getAll();
-      console.log('✅ Animaux chargés:', data);
+      ;
       setAnimals(data || []);
       
     } catch (err) {
@@ -61,9 +61,9 @@ export const useAnimals = (): UseAnimalsReturn => {
   // Charger les lots
   const loadBatches = useCallback(async () => {
     try {
-      console.log('🔄 Chargement des lots...');
+      ;
       const data = await animalService.getBatches();
-      console.log('✅ Lots chargés:', data);
+      ;
       setBatches(data || []);
       
     } catch (err) {
@@ -90,9 +90,9 @@ export const useAnimals = (): UseAnimalsReturn => {
       setCreating(true);
       setError('');
       
-      console.log('🆕 Création animal:', data);
+      ;
       const newAnimal = await animalService.create(data);
-      console.log('✅ Animal créé:', newAnimal);
+      ;
       
       setAnimals(prev => [...prev, newAnimal]);
       notificationService.success('Animal créé avec succès');
@@ -114,9 +114,9 @@ export const useAnimals = (): UseAnimalsReturn => {
       setUpdating(true);
       setError('');
       
-      console.log('📝 Mise à jour animal:', id, data);
+      ;
       const updatedAnimal = await animalService.update(id, data);
-      console.log('✅ Animal mis à jour:', updatedAnimal);
+      ;
       
       setAnimals(prev => prev.map(animal => 
         animal.id === id ? updatedAnimal : animal
@@ -140,9 +140,9 @@ export const useAnimals = (): UseAnimalsReturn => {
       setFeeding(true);
       setError('');
       
-      console.log('🍽️ Nourrissage animaux:', data);
+      ;
       const result = await animalService.feed(data);
-      console.log('✅ Nourrissage réussi:', result);
+      ;
       
       // Recharger les animaux pour mettre à jour les événements
       await loadAnimals();
@@ -167,9 +167,9 @@ export const useAnimals = (): UseAnimalsReturn => {
     try {
       setError('');
       
-      console.log('🆕 Création événement:', data);
+      ;
       const newEvent = await animalService.createEvent(data);
-      console.log('✅ Événement créé:', newEvent);
+      ;
       
       // Mettre à jour l'animal avec le nouvel événement
       setAnimals(prev => prev.map(animal => 
