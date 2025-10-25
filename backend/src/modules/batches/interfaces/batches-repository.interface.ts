@@ -11,4 +11,5 @@ export interface IBatchRepository {
   update(id: number, data: UpdateBatchDto): Promise<BatchEntity>;
   remove(id: number): void;
   getExpiringSoon(day: number): Promise<BatchEntity[]>;
+  updateRemaining(batchId: number, remaining: number): void;
 }

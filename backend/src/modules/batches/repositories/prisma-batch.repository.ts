@@ -7,7 +7,7 @@ import { UpdateBatchDto } from '../dto/update-batch.dto';
 
 @Injectable()
 export class PrismaBatchRepository {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private prisma: PrismaService | any) {}
 
   async create(data: CreateBatchDto) {
     return this.prisma.batch.create({
