@@ -50,7 +50,7 @@ export class InventoryService {
         productId: dto.productId,
         batchId: dto.batchId,
         quantity: dto.quantity,
-        date: dto.date ? new Date(dto.date).toISOString() : new Date().toISOString(),
+        date: dto.date ? new Date(dto.date) : new Date(),
         reference: dto.reference,
         note: dto.note,
       });

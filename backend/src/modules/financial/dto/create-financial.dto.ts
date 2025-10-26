@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsDateString, IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
 import { FinancialType } from '@prisma/client';
+import { Type } from 'class-transformer';
 
 export class CreateFinancialTransactionDto {
   @ApiProperty({
@@ -23,7 +24,8 @@ export class CreateFinancialTransactionDto {
     example: '2023-10-25T14:30:00.000Z',
   })
   @IsDateString()
-  date: string;
+  @Type(() => Date)
+  date: Date;
 
   @ApiProperty({
     description: 'Note optionnelle pour la transaction',

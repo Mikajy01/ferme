@@ -4,6 +4,7 @@ import { PurchasesController } from './controllers/purchases.controller';
 import { PrismaModule } from 'src/providers/prisma/prisma.module';
 import { PrismaUnitOfWork } from 'src/common/prisma/prisma-unit-of-work';
 import { PrismaPurchaseRepository } from './repositories/prisma-purchase.repository';
+import { PrismaService } from 'src/providers/prisma/prisma.service';
 
 @Module({
   imports: [PrismaModule],
@@ -11,7 +12,9 @@ import { PrismaPurchaseRepository } from './repositories/prisma-purchase.reposit
     PurchasesService,
     {
       provide: 'IPurchaseRepository',
-      useClass: PrismaPurchaseRepository,
+      useFactory: (prismaService: PrismaService) =>
+        new PrismaPurchaseRepository(prismaService),
+      inject: [PrismaService],
     },
     {
       provide: 'IUnitOfWork',

@@ -8,6 +8,8 @@ import { BatchesModule } from '../batches/batches.module';
 import { FinancialModule } from '../financial/financial.module';
 import { InventoryModule } from '../inventory/inventory.module';
 import { UnitsModule } from '../units/units.module';
+import { PurchasesModule } from '../purchases/purchases.module';
+import { AnimalsModule } from '../animals/animals.module';
 
 @Module({
   imports: [
@@ -21,7 +23,9 @@ import { UnitsModule } from '../units/units.module';
     ProductsModule,
     BatchesModule,
     FinancialModule,
+    PurchasesModule,
     InventoryModule,
+    AnimalsModule
   ],
 })
 export class AppModule {}

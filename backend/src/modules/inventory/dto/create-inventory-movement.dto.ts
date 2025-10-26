@@ -20,7 +20,7 @@ export class CreateInventoryMovementDto {
   @IsOptional()
   @Type(() => Date)
   @IsDate()
-  date?: string;
+  date?: Date;
 
   @IsString()
   @IsOptional()

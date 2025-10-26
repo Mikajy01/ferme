@@ -35,7 +35,7 @@ export class PurchasesService {
       const purchase = await tx.purchaseRepository.create(
         {
           supplier: createPurchaseDto.supplier,
-          date: new Date(createPurchaseDto.date).toDateString(),
+          date: createPurchaseDto.date,
           items: createPurchaseDto.items,
         },
         totalAmount
@@ -57,7 +57,7 @@ export class PurchasesService {
           productId: item.productId,
           batchId: batch.id,
           quantity: item.quantity,
-          date: new Date(createPurchaseDto.date).toDateString(),
+          date: new Date(createPurchaseDto.date),
           reference: `purchase:${purchase.id}`,
         });
       }
@@ -65,12 +65,12 @@ export class PurchasesService {
       await tx.financialRepository.create({
         type: 'EXPENSE',
         amount: totalAmount,
-        date: new Date(createPurchaseDto.date).toDateString(),
+        date: new Date(createPurchaseDto.date),
         note: `Achat auprès de ${createPurchaseDto.supplier}`,
         purchaseId: purchase.id,
       });
 
-      return this.findOne(purchase.id);
+      return purchase;
     });
   }
 
