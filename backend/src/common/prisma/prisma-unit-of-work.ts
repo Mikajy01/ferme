@@ -11,6 +11,7 @@ import { PrismaCultureEventRepository } from 'src/modules/cultures/repositories/
 import { PrismaCultureRepository } from 'src/modules/cultures/repositories/prisma-culture.repository';
 import { PrismaHarvestRepository } from 'src/modules/cultures/repositories/prisma-harvest.repository';
 import { PrismaProductsRepository } from 'src/modules/products/repositories/prisma-product.repository';
+import { PrismaProductionBatchRepository } from 'src/modules/production/repositories/prisma-production.repository';
 
 @Injectable()
 export class PrismaUnitOfWork implements IUnitOfWork {
@@ -31,6 +32,7 @@ export class PrismaUnitOfWork implements IUnitOfWork {
         cultureEventRepository: new PrismaCultureEventRepository(prismaTransaction),
         cultureRepository: new PrismaCultureRepository(prismaTransaction),
         harvestRepository: new PrismaHarvestRepository(prismaTransaction),
+        productionBatchRepository: new PrismaProductionBatchRepository(prismaTransaction),
       };
 
       return work(context);

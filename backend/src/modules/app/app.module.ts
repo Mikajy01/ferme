@@ -10,6 +10,9 @@ import { InventoryModule } from '../inventory/inventory.module';
 import { UnitsModule } from '../units/units.module';
 import { PurchasesModule } from '../purchases/purchases.module';
 import { AnimalsModule } from '../animals/animals.module';
+import { CulturesModule } from '../cultures/cultures.module';
+import { RecipesModule } from '../recipes/recipes.module';
+import { ProductionModule } from '../production/production.module';
 
 @Module({
   imports: [
@@ -25,7 +28,10 @@ import { AnimalsModule } from '../animals/animals.module';
     FinancialModule,
     PurchasesModule,
     InventoryModule,
-    AnimalsModule
+    AnimalsModule,
+    CulturesModule,
+    RecipesModule,
+    ProductionModule,
   ],
 })
 export class AppModule {}

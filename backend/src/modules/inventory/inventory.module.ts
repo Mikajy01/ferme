@@ -21,6 +21,6 @@ import { PrismaModule } from 'src/providers/prisma/prisma.module';
       useClass: PrismaUnitOfWork,
     },
   ],
-  exports: [InventoryService],
+  exports: [InventoryService, 'IInventoryRepository'],
 })
 export class InventoryModule {}

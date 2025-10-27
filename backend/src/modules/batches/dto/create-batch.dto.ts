@@ -6,6 +6,7 @@ import {
   IsDate,
   IsOptional,
   IsPositive,
+  IsNumber,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { Decimal } from '@prisma/client/runtime/library';
@@ -44,6 +45,14 @@ export class CreateBatchDto {
   @IsPositive()
   @Type(() => Number)
   unitPrice: number;
+
+  @ApiPropertyOptional({
+    description: 'Quantité restante dans le lot',
+    example: 80.5,
+  })
+  @IsOptional()
+  @IsNumber()
+  remaining?: number;
 
   @ApiProperty({
     description: 'Date de réception',

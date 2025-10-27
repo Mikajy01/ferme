@@ -4,9 +4,10 @@ import { PrismaService } from 'src/providers/prisma/prisma.service';
 import { CreateBatchDto } from '../dto/create-batch.dto';
 import { BatchFilterDto } from '../dto/batch-filter.dto';
 import { UpdateBatchDto } from '../dto/update-batch.dto';
+import { IBatchRepository } from '../interfaces/batches-repository.interface';
 
 @Injectable()
-export class PrismaBatchRepository {
+export class PrismaBatchRepository implements IBatchRepository {
   constructor(private prisma: PrismaService | any) {}
 
   async create(data: CreateBatchDto) {
@@ -147,6 +148,26 @@ export class PrismaBatchRepository {
         },
       },
       orderBy: { expiryDate: 'asc' },
+    });
+  }
+
+  async getBatchAvailable(productId: number) {
+    return this.prisma.batch.findMany({
+      where: {
+        productId,
+        remaining: { gt: 0 },
+      },
+      include: {  
+        product: {
+          select: {
+            id: true,
+            name: true,
+            sku: true,
+            category: true,
+          },
+        },
+      },
+      orderBy: { receivedAt: 'asc' },
     });
   }
 }

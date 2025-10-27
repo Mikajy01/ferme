@@ -4,6 +4,7 @@ import { PrismaModule } from 'src/providers/prisma/prisma.module';
 import { PrismaProductsRepository } from './repositories/prisma-product.repository';
 import { ProductsService } from './services/products.service';
 import { ProductsController } from './controllers/products.controller';
+import { PrismaService } from 'src/providers/prisma/prisma.service';
 
 @Module({
   imports: [PrismaModule, UnitsModule],
@@ -12,7 +13,9 @@ import { ProductsController } from './controllers/products.controller';
     ProductsService,
     {
       provide: 'IProductRepository',
-      useClass: PrismaProductsRepository,
+      useFactory: (prismaService: PrismaService) =>
+        new PrismaProductsRepository(prismaService),
+      inject: [PrismaService],
     },
   ],
   exports: [ProductsService, 'IProductRepository'],

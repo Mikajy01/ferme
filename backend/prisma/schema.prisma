@@ -65,7 +65,8 @@ model Product {
   recipeIngredients  RecipeIngredient[]
   saleItems          SaleItem[]
   batches            Batch[]
-  harvests            Harvest[]
+  harvests           Harvest[]
+  recipeOutputs      Recipe[]            @relation("recipeOutput")
   productionOutputs  ProductionBatch[]   @relation("outputProduct")
 }
 
@@ -122,16 +123,19 @@ model InventoryMovement {
   reference         String? // ex: "purchase:123", "production:45", "sale:789"
   note              String?
 
-  animalEvents      AnimalEvent[]
+  animalEvents AnimalEvent[]
 }
 
 model Recipe {
-  id          Int                @id @default(autoincrement())
-  name        String
-  description String?
-  createdAt   DateTime           @default(now())
-  ingredients RecipeIngredient[]
-  productions ProductionBatch[]
+  id              Int                @id @default(autoincrement())
+  name            String
+  description     String?
+  outputProductId Int
+  outputProduct   Product            @relation("recipeOutput", fields: [outputProductId], references: [id])
+  outputQuantity  Decimal            @db.Decimal(12, 4) // qty produced per batch
+  createdAt       DateTime           @default(now())
+  ingredients     RecipeIngredient[]
+  productions     ProductionBatch[]
 }
 
 model RecipeIngredient {
@@ -212,13 +216,13 @@ model Animal {
 }
 
 model AnimalEvent {
-  id                 Int                @id @default(autoincrement())
-  animalId           Int
-  animal             Animal             @relation(fields: [animalId], references: [id])
-  type               String             // "feed", "sale", "vet", "birth", etc.
-  date               DateTime           @default(now())
-  note               String?
-  cost               Decimal?           @db.Decimal(12, 2)
+  id       Int      @id @default(autoincrement())
+  animalId Int
+  animal   Animal   @relation(fields: [animalId], references: [id])
+  type     String // "feed", "sale", "vet", "birth", etc.
+  date     DateTime @default(now())
+  note     String?
+  cost     Decimal? @db.Decimal(12, 2)
 
   // 🔗 Nouveau : lien vers InventoryMovement
   inventoryMovementId Int?
@@ -226,39 +230,38 @@ model AnimalEvent {
 }
 
 model Culture {
-  id           Int               @id @default(autoincrement())
-  name         String
-  startDate    DateTime          @default(now())
-  endDate      DateTime?
-  status       String            @default("ongoing") // ongoing, harvested, cancelled, etc.
-  area         Decimal?          @db.Decimal(12,2)
-  note         String?
-  createdAt    DateTime          @default(now())
-  updatedAt    DateTime          @updatedAt
+  id        Int       @id @default(autoincrement())
+  name      String
+  startDate DateTime  @default(now())
+  endDate   DateTime?
+  status    String    @default("ongoing") // ongoing, harvested, cancelled, etc.
+  area      Decimal?  @db.Decimal(12, 2)
+  note      String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 
   // relations
-  events       CultureEvent[]
-  harvests     Harvest[]
+  events   CultureEvent[]
+  harvests Harvest[]
 }
 
 model CultureEvent {
-  id          Int       @id @default(autoincrement())
+  id          Int      @id @default(autoincrement())
   cultureId   Int
-  culture     Culture   @relation(fields: [cultureId], references: [id])
-  type        String    // "seeding", "watering", "fertilization", "weeding", "harvest", etc.
-  date        DateTime  @default(now())
+  culture     Culture  @relation(fields: [cultureId], references: [id])
+  type        String // "seeding", "watering", "fertilization", "weeding", "harvest", etc.
+  date        DateTime @default(now())
   description String?
   cost        Decimal  @db.Decimal(12, 2)
 }
 
-
 model Harvest {
-  id         Int       @id @default(autoincrement())
-  cultureId  Int
-  culture    Culture   @relation(fields: [cultureId], references: [id])
-  productId  Int
-  product    Product   @relation(fields: [productId], references: [id])
-  quantity   Decimal   @db.Decimal(12,4)
-  date       DateTime  @default(now())
-  note       String?
+  id        Int      @id @default(autoincrement())
+  cultureId Int
+  culture   Culture  @relation(fields: [cultureId], references: [id])
+  productId Int
+  product   Product  @relation(fields: [productId], references: [id])
+  quantity  Decimal  @db.Decimal(12, 4)
+  date      DateTime @default(now())
+  note      String?
 }

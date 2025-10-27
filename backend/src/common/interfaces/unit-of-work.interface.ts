@@ -6,6 +6,7 @@ import { ICultureRepository } from "src/modules/cultures/interfaces/culture-repo
 import { IHarvestRepository } from "src/modules/cultures/interfaces/harvest-repository.interface";
 import { IFinancialRepository } from "src/modules/financial/interfaces/financial-repository.interface";
 import { IInventoryRepository } from "src/modules/inventory/interfaces/inventory-repository.interface";
+import { IProductionBatchRepository } from "src/modules/production/interfaces/production-batch-repository.interface";
 import { IProductRepository } from "src/modules/products/interfaces/product-repository.interface";
 import { IPurchaseRepository } from "src/modules/purchases/interfaces/purchase-repository.interface";
 
@@ -24,4 +25,5 @@ export interface ITransactionContext {
   cultureRepository: ICultureRepository;
   cultureEventRepository: ICultureEventRepository;
   harvestRepository: IHarvestRepository;
+  productionBatchRepository: IProductionBatchRepository;
 }

@@ -223,7 +223,7 @@ getAll: async (filters: ProductsFilters = {}): Promise<ProductsResponse> => {
     try {
       const response = await fetchWithAuth(`${API_BASE_URL}/products/${id}/stock`);
       const data = await response.json();
-      return data || 0;
+      return data.currentStock || 0;
     } catch (error) {
       console.warn(`Erreur récupération stock produit ${id}:`, error);
       return 0;

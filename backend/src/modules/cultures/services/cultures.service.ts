@@ -11,6 +11,7 @@ import { IHarvestRepository } from '../interfaces/harvest-repository.interface';
 import { CreateCultureDto } from '../dto/create-culture.dto';
 import { CreateHarvestDto } from '../dto/create-harvest.dto';
 import { CreateCultureEventDto } from '../dto/create-culture-event.dto';
+import { SeedCultureDto } from '../dto/seed-culture.dto';
 
 @Injectable()
 export class CulturesService {
@@ -124,7 +125,7 @@ export class CulturesService {
       const event = await tx.cultureEventRepository.create({
         cultureId: createEventDto.cultureId,
         type: createEventDto.type,
-        date: createEventDto.date ? new Date(createEventDto.date) : new Date(),
+        date: createEventDto.date,
         description: createEventDto.description,
         cost: createEventDto.cost || 0,
       });
@@ -148,11 +149,78 @@ export class CulturesService {
           date: createEventDto.date
             ? new Date(createEventDto.date)
             : new Date(),
-          note: `${createEventDto.type} - Culture ${culture.name}`,
+          note: `${createEventDto.type} - Culture ${culture?.name}`,
         });
       }
 
       return event;
+    });
+  }
+
+  async seed(seedCultureDto: SeedCultureDto) {
+    const { batchId, quantity, cultureId, date } = seedCultureDto;
+
+    return this.unitOfWork.executeTransaction(async (tx) => {
+      // 1️⃣ Récupérer le batch et le produit associé
+      const batch = await tx.batchRepository.findOne(batchId);
+
+      if (!batch) {
+        throw new NotFoundException(`Batch ${batchId} introuvable`);
+      }
+
+      // 2️⃣ Vérifier le stock restant
+      if (batch.remaining < quantity) {
+        throw new ForbiddenException(
+          `Stock insuffisant pour le batch ${batchId}. Disponible: ${batch.remaining}, demandé: ${quantity}`,
+        );
+      }
+
+      // 3️⃣ Vérifier que la culture existe
+      const culture = await tx.cultureRepository.findById(cultureId);
+      if (!culture) {
+        throw new NotFoundException(`Culture ${cultureId} introuvable`);
+      }
+
+      // 4️⃣ Créer le mouvement de stock (OUT)
+      const movement = await tx.inventoryRepository.createMovement({
+        type: 'OUT',
+        productId: batch.productId,
+        batchId: batch.id,
+        quantity,
+        date: new Date(date),
+        reference: `seed:${cultureId}`,
+        note: `Application de ${batch.product.name} sur culture ${culture.name}`,
+      });
+
+      // 5️⃣ Créer un événement pour la culture
+      const cultureEvent = await tx.cultureEventRepository.create({
+        cultureId,
+        type: 'seeding',
+        date,
+        description: `Semis/Application de ${quantity} ${batch.product.name}`,
+        cost: quantity * batch.unitPrice,
+      });
+
+      // 6️⃣ Mettre à jour le batch (décrément du stock restant)
+      await tx.batchRepository.updateRemaining(batch.id, batch.remaining - quantity);
+
+      // 7️⃣ Créer une transaction financière
+      const totalCost = quantity * batch.unitPrice;
+      if (totalCost > 0) {
+        await tx.financialRepository.create({
+          type: 'EXPENSE',
+          amount: totalCost,
+          date: new Date(date),
+          note: `Semis/Intrants culture ${culture.name} - ${batch.product.name}`,
+        });
+      }
+
+      return {
+        message: `Semis/Application effectué avec succès pour la culture ${culture.name}.`,
+        quantity,
+        movement,
+        cultureEvent,
+      };
     });
   }
 }

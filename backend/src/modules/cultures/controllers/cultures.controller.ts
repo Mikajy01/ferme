@@ -16,10 +16,11 @@ import {
   ApiOkResponse,
   ApiParam,
 } from '@nestjs/swagger';
-import { CulturesService } from '../services/cultures.service';
+import { CreateCultureEventDto } from '../dto/create-culture-event.dto';
 import { CreateCultureDto } from '../dto/create-culture.dto';
 import { CreateHarvestDto } from '../dto/create-harvest.dto';
-import { CreateCultureEventDto } from '../dto/create-culture-event.dto';
+import { SeedCultureDto } from '../dto/seed-culture.dto';
+import { CulturesService } from '../services/cultures.service';
 
 @ApiTags('Cultures')
 @Controller('cultures')
@@ -31,6 +32,13 @@ export class CulturesController {
   @ApiCreatedResponse({ description: 'Culture créée' })
   create(@Body() createCultureDto: CreateCultureDto) {
     return this.culturesService.create(createCultureDto);
+  }
+
+  @Post('seed')
+  @ApiOperation({ summary: 'Semer/Appliquer des intrants à une culture' })
+  @ApiCreatedResponse({ description: 'Semis/Intrants appliqués' })
+  seed(@Body() seedCultureDto: SeedCultureDto) {
+    return this.culturesService.seed(seedCultureDto);
   }
 
   @Post('harvest')

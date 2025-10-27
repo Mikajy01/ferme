@@ -13,6 +13,10 @@ export class CreateInventoryMovementDto {
   @IsOptional()
   batchId?: number;
 
+  @IsInt()
+  @IsOptional()
+  productionBatchId?: number;
+
   @IsNumber()
   quantity: number;
 
