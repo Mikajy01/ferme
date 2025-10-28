@@ -40,6 +40,19 @@ export interface ProductionBatch {
   inventoryMovements?: any[];
 }
 
+export interface Batch {
+  id: number;
+  productId: number;
+  purchaseItemId: number | null;
+  quantity: number;
+  remaining: number;
+  unitPrice: number;
+  receivedAt: string;
+  expiryDate: string | null;
+  createdAt: string;
+  product?: Product;
+}
+
 export interface SaleItem {
   id?: number;
   saleId?: number;
@@ -250,10 +263,10 @@ export const saleService = {
   },
 
   // Récupérer TOUS les lots de production - VERSION CORRIGÉE
-  getAllProductionBatches: async (): Promise<ProductionBatch[]> => {
+  getAllBatches: async (): Promise<Batch[]> => {
     try {
-      ;
-      const response = await fetchWithAuth(`${API_BASE_URL}/production`);
+      console.log('🔄 Récupération de tous les lots de production depuis /api/production...');
+      const response = await fetchWithAuth(`${API_BASE_URL}/batches`);
       
       if (!response.ok) {
         throw new Error(`Erreur HTTP ${response.status}: ${response.statusText}`);
@@ -271,37 +284,7 @@ export const saleService = {
       ;
       ;
       
-      // Formater les données pour correspondre à l'interface ProductionBatch
-      const formattedBatches = batches.map((batch: any) => {
-        try {
-          ;
-          
-          const formattedBatch: ProductionBatch = {
-            id: batch.id,
-            recipeId: batch.recipeId,
-            outputProductId: batch.outputProductId,
-            outputQuantity: parseFloat(batch.outputQuantity || '0'),
-            date: batch.date,
-            costTotal: parseFloat(batch.costTotal || '0'),
-            remaining: parseFloat(batch.outputQuantity || '0'), // Par défaut, on utilise outputQuantity comme remaining
-            recipe: batch.recipe,
-            outputProduct: batch.outputProduct,
-            inventoryMovements: batch.inventoryMovements,
-            // Calculer le prix unitaire basé sur le coût total et la quantité
-            unitPrice: batch.costTotal && batch.outputQuantity ? 
-              parseFloat(batch.costTotal) / parseFloat(batch.outputQuantity) : 0
-          };
-          
-          ;
-          return formattedBatch;
-        } catch (formatError) {
-          console.error(`❌ Erreur formatage lot ${batch.id}:`, batch, formatError);
-          return null;
-        }
-      }).filter((batch): batch is ProductionBatch => batch !== null);
-      
-      ;
-      return formattedBatches;
+      return batches;
 
     } catch (error) {
       console.error("❌ Erreur récupération lots de production:", error);
@@ -310,19 +293,19 @@ export const saleService = {
   },
 
   // Récupérer les lots disponibles pour un produit spécifique - VERSION CORRIGÉE
-  getAvailableBatches: async (productId: number): Promise<ProductionBatch[]> => {
+  getAvailableBatches: async (productId: number): Promise<Batch[]> => {
     try {
       ;
       
-      // Récupérer tous les lots depuis /api/production
-      const allBatches = await saleService.getAllProductionBatches();
+      // Récupérer tous les lots depuis /api/batches
+      const allBatches = await saleService.getAllBatches();
       
       ;
       
       // Filtrer les lots pour le produit spécifié
       const batchesForProduct = allBatches.filter(batch => {
-        const matches = batch.outputProductId === productId;
-        ;
+        const matches = batch.productId === productId;
+        console.log(`🔍 Lot ${batch.id} - Produit: ${batch.productId}, Recherché: ${productId}, Match: ${matches}`);
         return matches;
       });
       
@@ -361,9 +344,9 @@ export const saleService = {
       ;
       
       // Récupérer tous les lots et vérifier si l'ID existe
-      const allBatches = await saleService.getAllProductionBatches();
-      ;
-      ;
+      const allBatches = await saleService.getAllBatches();
+      console.log(`📊 Total des lots récupérés: ${allBatches.length}`);
+      console.log(`📋 IDs des lots:`, allBatches.map(b => b.id));
       
       const exists = allBatches.some(batch => {
         const match = batch.id === batchId;
@@ -388,11 +371,11 @@ export const saleService = {
   },
 
   // NOUVELLE MÉTHODE: Récupérer un lot spécifique par ID
-  getBatchById: async (batchId: number): Promise<ProductionBatch | null> => {
+  getBatchById: async (batchId: number): Promise<Batch | null> => {
     try {
       ;
       
-      const allBatches = await saleService.getAllProductionBatches();
+      const allBatches = await saleService.getAllBatches();
       const batch = allBatches.find(b => b.id === batchId);
       
       ;

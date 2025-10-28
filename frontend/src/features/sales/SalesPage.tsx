@@ -309,7 +309,7 @@ const SalesPage: React.FC = () => {
     const batch = availableBatches.find(b => b.id === batchId);
     if (!batch) return 'Lot inconnu';
     
-    const remaining = batch.remaining || batch.outputQuantity;
+    const remaining = batch.remaining;
     const unitPrice = batch.unitPrice ? ` - ${parseFloat(batch.unitPrice.toString()).toLocaleString()} Ar/unité` : '';
     const expiryInfo = batch.expiryDate ? ` - Exp: ${formatDate(batch.expiryDate)}` : '';
     

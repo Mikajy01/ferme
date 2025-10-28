@@ -1,12 +1,12 @@
 import { useState, useEffect, useCallback } from 'react';
-import { saleService, type Sale, type CreateSaleDto, type Product, type ProductionBatch, type Unit } from '../services/saleService';
+import { saleService, type Sale, type CreateSaleDto, type Product, type ProductionBatch, type Unit, type Batch } from '../services/saleService';
 import { notificationService } from '../services/notificationService';
 
 interface UseSalesReturn {
   // États
   sales: Sale[];
   products: Product[];
-  availableBatches: ProductionBatch[];
+  availableBatches: Batch[];
   units: Unit[];
   loading: boolean;
   error: string;
@@ -21,13 +21,13 @@ interface UseSalesReturn {
   refreshSales: () => Promise<void>;
   checkProductExists: (productId: number) => Promise<boolean>;
   checkBatchExists: (batchId: number) => Promise<boolean>;
-  getBatchById: (batchId: number) => Promise<ProductionBatch | null>;
+  getBatchById: (batchId: number) => Promise<Batch | null>;
 }
 
 export const useSales = (): UseSalesReturn => {
   const [sales, setSales] = useState<Sale[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
-  const [availableBatches, setAvailableBatches] = useState<ProductionBatch[]>([]);
+  const [availableBatches, setAvailableBatches] = useState<Batch[]>([]);
   const [units, setUnits] = useState<Unit[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -140,7 +140,7 @@ export const useSales = (): UseSalesReturn => {
   };
 
   // Récupérer un lot par ID
-  const getBatchById = async (batchId: number): Promise<ProductionBatch | null> => {
+  const getBatchById = async (batchId: number): Promise<Batch | null> => {
     try {
       ;
       const batch = await saleService.getBatchById(batchId);
