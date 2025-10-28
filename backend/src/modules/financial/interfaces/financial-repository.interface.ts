@@ -6,4 +6,5 @@ export interface IFinancialRepository {
   findById(id: number): Promise<FinancialEntity | null>;
   findAll(interval: {startDate?: Date, endDate?: Date}): Promise<FinancialEntity[]>;
   findByType(type: string, interval: {startDate?: Date, endDate?: Date}): Promise<FinancialEntity[]>;
+  deleteBySaleId(saleId: number): Promise<void>;
 }

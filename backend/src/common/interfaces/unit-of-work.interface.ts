@@ -9,6 +9,7 @@ import { IInventoryRepository } from "src/modules/inventory/interfaces/inventory
 import { IProductionBatchRepository } from "src/modules/production/interfaces/production-batch-repository.interface";
 import { IProductRepository } from "src/modules/products/interfaces/product-repository.interface";
 import { IPurchaseRepository } from "src/modules/purchases/interfaces/purchase-repository.interface";
+import { ISaleRepository } from "src/modules/sales/interfaces/sale-repository.interface";
 
 export interface IUnitOfWork {
   executeTransaction<T>(work: (transaction: ITransactionContext) => Promise<T>): Promise<T>;
@@ -26,4 +27,5 @@ export interface ITransactionContext {
   cultureEventRepository: ICultureEventRepository;
   harvestRepository: IHarvestRepository;
   productionBatchRepository: IProductionBatchRepository;
+  saleRepository: ISaleRepository;
 }

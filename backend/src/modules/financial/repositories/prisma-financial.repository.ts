@@ -89,6 +89,12 @@ export class PrismaFinancialTransactionRepository implements IFinancialRepositor
     return this.prisma.financialTransaction.delete({ where: { id } });
   }
 
+  async deleteBySaleId(saleId: number): Promise<void> {
+    await this.prisma.financialTransaction.deleteMany({
+      where: { saleId },
+    });
+  }
+
   async findByType(
     type: FinancialType,
     options?: { startDate?: Date; endDate?: Date },
