@@ -1,4 +1,3 @@
-
 import { authService } from './authService';
 
 export interface Product {
@@ -178,6 +177,27 @@ export const recipeService = {
       );
     } catch (error) {
       console.error("❌ Erreur création recette:", error);
+      throw error;
+    }
+  },
+
+  // Supprimer une recette
+  deleteRecipe: async (id: number): Promise<void> => {
+    try {
+      const response = await fetchWithAuth(`${API_BASE_URL}/recipes/${id}`, {
+        method: "DELETE",
+      });
+
+      if (response.status === 200) {
+        return;
+      }
+
+      const errorText = await response.text();
+      throw new Error(
+        `Erreur ${response.status}: ${errorText || "Erreur lors de la suppression de la recette"}`
+      );
+    } catch (error) {
+      console.error("❌ Erreur suppression recette:", error);
       throw error;
     }
   },

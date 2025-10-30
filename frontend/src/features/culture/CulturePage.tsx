@@ -101,7 +101,6 @@ const CulturePage: React.FC = () => {
     'Tous',
     'fertilization',
     'pesticide',
-    'seeding',
     'labor',
     'water',
     'fuel',
@@ -387,7 +386,7 @@ const handleTerminerCulture = async (id: number) => {
             </h2>
             <button
               onClick={() => setShowAddCulture(true)}
-              className="btn-primary flex items-center gap-2 px-4 py-2 shadow-md hover:shadow-lg transition-shadow"
+              className="bg-[#129619] rounded-md text-white flex items-center gap-2 px-6 py-3 whitespace-nowrap shadow-md hover:shadow-lg transition-shadow"
               disabled={creating}
             >
               <Plus size={18} />
@@ -532,7 +531,7 @@ const handleTerminerCulture = async (id: number) => {
 
                 <button
                   onClick={() => setShowAddDepense(true)}
-                  className="btn-primary flex items-center gap-2 px-6 py-3 whitespace-nowrap shadow-md hover:shadow-lg transition-shadow"
+                  className="bg-[#129619] rounded-md text-white flex items-center gap-2 px-6 py-3 whitespace-nowrap shadow-md hover:shadow-lg transition-shadow"
                   disabled={creating}
                 >
                   <Plus size={18} />
@@ -541,7 +540,7 @@ const handleTerminerCulture = async (id: number) => {
 
                 <button
                   onClick={() => setShowAddHarvest(true)}
-                  className="btn-primary flex items-center gap-2 px-6 py-3 whitespace-nowrap shadow-md hover:shadow-lg transition-shadow"
+                  className="bg-[#129619] rounded-md text-white flex items-center gap-2 px-6 py-3 whitespace-nowrap shadow-md hover:shadow-lg transition-shadow"
                   disabled={harvesting}
                 >
                   <Plus size={18} />
@@ -550,7 +549,7 @@ const handleTerminerCulture = async (id: number) => {
 
                 <button
                   onClick={() => setShowAddSeed(true)}
-                  className="btn-primary flex items-center gap-2 px-6 py-3 whitespace-nowrap shadow-md hover:shadow-lg transition-shadow"
+                  className="bg-[#129619] rounded-md text-white flex items-center gap-2 px-6 py-3 whitespace-nowrap shadow-md hover:shadow-lg transition-shadow"
                   disabled={seeding}
                 >
                   <Plus size={18} />

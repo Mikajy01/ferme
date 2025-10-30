@@ -198,7 +198,7 @@ const UsersPage: React.FC = () => {
                 <button
                   onClick={() => setShowAddUser(true)}
                   disabled={creating}
-                  className="btn-primary flex items-center gap-2 px-6 py-3 whitespace-nowrap shadow-md hover:shadow-lg transition-shadow disabled:opacity-50"
+                  className="bg-[#129619] rounded-md text-white flex items-center gap-2 px-6 py-3 whitespace-nowrap shadow-md hover:shadow-lg transition-shadow"
                 >
                   {creating ? (
                     <Loader className="animate-spin" size={18} />

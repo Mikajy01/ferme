@@ -14,6 +14,8 @@ import {
   ChevronUp,
   ArrowUp,
   Utensils,
+  AlertTriangle,
+  X,
 } from 'lucide-react';
 import { toast } from 'react-toastify';
 import Sidebar from '../../components/Sidebar';
@@ -21,7 +23,8 @@ import { useRecipes } from '../../hooks/useRecipes';
 import type { 
   CreateRecipeDto, 
   CreateProductionDto,
-  RecipeIngredient 
+  RecipeIngredient, 
+  Recipe
 } from '../../services/recipeService';
 
 const RecipePage: React.FC = () => {
@@ -34,8 +37,10 @@ const RecipePage: React.FC = () => {
     error,
     creatingRecipe,
     creatingProduction,
+    deletingRecipe,
     createRecipe,
     createProductionBatch,
+    deleteRecipe,
     getMaxProductionQuantity,
   } = useRecipes();
 
@@ -45,6 +50,11 @@ const RecipePage: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [activeTab, setActiveTab] = useState<'recipes' | 'production'>('recipes');
   const [showScrollToTop, setShowScrollToTop] = useState(false);
+  const [deletingRecipeId, setDeletingRecipeId] = useState<number | null>(null);
+  const [showDeleteModal, setShowDeleteModal] = useState<{show: boolean; recipe: Recipe | null}>({
+    show: false,
+    recipe: null
+  });
  
   const [maxQuantityData, setMaxQuantityData] = useState<any>(null);
   const [calculatingMax, setCalculatingMax] = useState(false);
@@ -140,32 +150,54 @@ const RecipePage: React.FC = () => {
   };
 
   const handleAddProduction = async () => {
-  if (!newProduction.recipeId || !newProduction.outputQuantity) {
-    toast.error('Veuillez remplir tous les champs obligatoires');
-    return;
-  }
+    if (!newProduction.recipeId || !newProduction.outputQuantity) {
+      toast.error('Veuillez remplir tous les champs obligatoires');
+      return;
+    }
 
-  try {
-    // CORRECTION: S'assurer que outputQuantity est un nombre
-    const productionData = {
-      ...newProduction,
-      outputQuantity: Number(newProduction.outputQuantity) // Convertir en nombre
-    };
+    try {
+      // CORRECTION: S'assurer que outputQuantity est un nombre
+      const productionData = {
+        ...newProduction,
+        outputQuantity: Number(newProduction.outputQuantity) // Convertir en nombre
+      };
 
-    await createProductionBatch(productionData);
-    setNewProduction({
-      recipeId: 0,
-      outputProductId: 0,
-      outputQuantity: 1,
-      date: new Date().toISOString().split('T')[0],
-    });
-    setShowAddProduction(false);
-    setMaxQuantityData(null); // Réinitialiser les données de capacité
-    toast.success('Lot de production créé avec succès');
-  } catch (error) {
-    console.error('Erreur lors de la création du lot de production:', error);
-  }
-};
+      await createProductionBatch(productionData);
+      setNewProduction({
+        recipeId: 0,
+        outputProductId: 0,
+        outputQuantity: 1,
+        date: new Date().toISOString().split('T')[0],
+      });
+      setShowAddProduction(false);
+      setMaxQuantityData(null); // Réinitialiser les données de capacité
+      toast.success('Lot de production créé avec succès');
+    } catch (error) {
+      console.error('Erreur lors de la création du lot de production:', error);
+    }
+  };
+
+  const handleDeleteRecipe = async (recipeId: number) => {
+    try {
+      setDeletingRecipeId(recipeId);
+      await deleteRecipe(recipeId);
+      setShowDeleteModal({ show: false, recipe: null });
+      toast.success('Recette supprimée avec succès');
+    } catch (error) {
+      console.error('Erreur lors de la suppression de la recette:', error);
+      toast.error('Erreur lors de la suppression de la recette');
+    } finally {
+      setDeletingRecipeId(null);
+    }
+  };
+
+  const openDeleteModal = (recipe: Recipe) => {
+    setShowDeleteModal({ show: true, recipe });
+  };
+
+  const closeDeleteModal = () => {
+    setShowDeleteModal({ show: false, recipe: null });
+  };
 
   const handleAddIngredient = () => {
     setNewRecipe(prev => ({
@@ -210,18 +242,18 @@ const RecipePage: React.FC = () => {
     }
   };
 
- const handleRecipeSelect = (recipeId: number) => {
-  const recipe = recipes.find(r => r.id === recipeId);
-  if (recipe) {
-    setNewProduction(prev => ({
-      ...prev,
-      recipeId: recipe.id,
-      outputProductId: recipe.outputProductId,
-      outputQuantity: Number(recipe.outputQuantity) 
-    }));
-    handleCalculateMaxQuantity(recipeId);
-  }
-};
+  const handleRecipeSelect = (recipeId: number) => {
+    const recipe = recipes.find(r => r.id === recipeId);
+    if (recipe) {
+      setNewProduction(prev => ({
+        ...prev,
+        recipeId: recipe.id,
+        outputProductId: recipe.outputProductId,
+        outputQuantity: Number(recipe.outputQuantity) 
+      }));
+      handleCalculateMaxQuantity(recipeId);
+    }
+  };
 
   const getProductName = (productId: number) => {
     return products.find(p => p.id === productId)?.name || 'Produit inconnu';
@@ -447,6 +479,17 @@ const RecipePage: React.FC = () => {
                         >
                           <Play size={14} />
                           Produire
+                        </button>
+                        <button
+                          onClick={() => openDeleteModal(recipe)}
+                          disabled={deletingRecipe && deletingRecipeId === recipe.id}
+                          className="p-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors disabled:opacity-50 flex items-center justify-center"
+                        >
+                          {deletingRecipe && deletingRecipeId === recipe.id ? (
+                            <Loader className="animate-spin" size={14} />
+                          ) : (
+                            <Trash2 size={14} />
+                          )}
                         </button>
                       </div>
                     </div>
@@ -828,6 +871,87 @@ const RecipePage: React.FC = () => {
                   )}
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de confirmation de suppression */}
+      {showDeleteModal.show && showDeleteModal.recipe && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg max-w-md w-full shadow-2xl transform transition-all">
+            {/* En-tête de la modal */}
+            <div className="flex items-center justify-between p-6 border-b border-gray-200">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-red-100 rounded-lg">
+                  <AlertTriangle className="text-red-600" size={24} />
+                </div>
+                <h3 className="text-xl font-bold text-gray-900">
+                  Supprimer la recette
+                </h3>
+              </div>
+              <button
+                onClick={closeDeleteModal}
+                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                disabled={deletingRecipe}
+              >
+                <X size={20} className="text-gray-500" />
+              </button>
+            </div>
+
+            {/* Contenu de la modal */}
+            <div className="p-6">
+              <div className="mb-4">
+                <p className="text-gray-700 mb-3">
+                  Êtes-vous sûr de vouloir supprimer cette recette ? Cette action est irréversible.
+                </p>
+                <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                  <div className="flex items-start gap-3">
+                    <AlertTriangle className="text-red-500 mt-0.5 flex-shrink-0" size={18} />
+                    <div>
+                      <p className="font-semibold text-red-800 text-sm">
+                        Recette à supprimer :
+                      </p>
+                      <p className="text-red-700 text-sm mt-1">
+                        <strong>{showDeleteModal.recipe.name}</strong>
+                      </p>
+                      {showDeleteModal.recipe.description && (
+                        <p className="text-red-600 text-xs mt-1">
+                          {showDeleteModal.recipe.description}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Actions de la modal */}
+            <div className="flex gap-3 p-6 border-t border-gray-200">
+              <button
+                onClick={closeDeleteModal}
+                disabled={deletingRecipe}
+                className="flex-1 py-3 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors disabled:opacity-50"
+              >
+                Annuler
+              </button>
+              <button
+                onClick={() => handleDeleteRecipe(showDeleteModal.recipe!.id)}
+                disabled={deletingRecipe}
+                className="flex-1 py-3 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+              >
+                {deletingRecipe ? (
+                  <>
+                    <Loader className="animate-spin" size={18} />
+                    Suppression...
+                  </>
+                ) : (
+                  <>
+                    <Trash2 size={18} />
+                    Supprimer
+                  </>
+                )}
+              </button>
             </div>
           </div>
         </div>

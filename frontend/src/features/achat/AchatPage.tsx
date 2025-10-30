@@ -196,7 +196,7 @@ const AchatsPage: React.FC = () => {
               <div className="flex w-full lg:w-auto justify-start lg:justify-end">
                 <button
                   onClick={() => setShowAddPurchase(true)}
-                  className="flex items-center gap-2 bg-[var(--color-primary)] text-white px-4 py-2 rounded-lg hover:bg-[var(--color-primary-dark)] transition-colors disabled:opacity-50 text-sm sm:text-base whitespace-nowrap"
+                  className="bg-[#129619] rounded-md text-white flex items-center gap-2 px-6 py-3 whitespace-nowrap shadow-md hover:shadow-lg transition-shadow"
                   disabled={creating}
                 >
                   {creating ? (

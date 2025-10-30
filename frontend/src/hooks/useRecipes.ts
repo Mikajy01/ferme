@@ -21,9 +21,11 @@ interface UseRecipesReturn {
   error: string;
   creatingRecipe: boolean;
   creatingProduction: boolean;
+  deletingRecipe: boolean;
   
   // Fonctions pour les recettes
   createRecipe: (data: CreateRecipeDto) => Promise<void>;
+  deleteRecipe: (id: number) => Promise<void>;
   getRecipeById: (id: number) => Promise<Recipe>;
   refreshRecipes: () => Promise<void>;
   
@@ -47,6 +49,7 @@ export const useRecipes = (): UseRecipesReturn => {
   const [error, setError] = useState('');
   const [creatingRecipe, setCreatingRecipe] = useState(false);
   const [creatingProduction, setCreatingProduction] = useState(false);
+  const [deletingRecipe, setDeletingRecipe] = useState(false);
 
   // Charger les recettes
   const loadRecipes = useCallback(async () => {
@@ -54,9 +57,9 @@ export const useRecipes = (): UseRecipesReturn => {
       setLoading(true);
       setError('');
 
-      ;
+      console.log('📥 Chargement des recettes...');
       const data = await recipeService.getAllRecipes();
-      ;
+      console.log('✅ Recettes chargées:', data?.length);
       setRecipes(data || []);
 
     } catch (err) {
@@ -73,9 +76,9 @@ export const useRecipes = (): UseRecipesReturn => {
   // Charger les lots de production
   const loadProductionBatches = useCallback(async () => {
     try {
-      ;
+      console.log('📥 Chargement des lots de production...');
       const data = await recipeService.getAllProductionBatches();
-      ;
+      console.log('✅ Lots de production chargés:', data?.length);
       setProductionBatches(data || []);
 
     } catch (err) {
@@ -89,9 +92,9 @@ export const useRecipes = (): UseRecipesReturn => {
   // Charger les produits
   const loadProducts = useCallback(async () => {
     try {
-      ;
+      console.log('📥 Chargement des produits...');
       const data = await recipeService.getProducts();
-      ;
+      console.log('✅ Produits chargés:', data?.length);
       setProducts(data || []);
 
     } catch (err) {
@@ -105,9 +108,9 @@ export const useRecipes = (): UseRecipesReturn => {
   // Charger les unités
   const loadUnits = useCallback(async () => {
     try {
-      ;
+      console.log('📥 Chargement des unités...');
       const data = await recipeService.getUnits();
-      ;
+      console.log('✅ Unités chargées:', data?.length);
       setUnits(data || []);
 
     } catch (err) {
@@ -144,9 +147,9 @@ export const useRecipes = (): UseRecipesReturn => {
       setCreatingRecipe(true);
       setError('');
 
-      ;
+      console.log('📝 Création d\'une nouvelle recette:', data);
       const newRecipe = await recipeService.createRecipe(data);
-      ;
+      console.log('✅ Recette créée:', newRecipe);
 
       setRecipes(prev => [...prev, newRecipe]);
       notificationService.success('Recette créée avec succès');
@@ -159,6 +162,30 @@ export const useRecipes = (): UseRecipesReturn => {
       throw err;
     } finally {
       setCreatingRecipe(false);
+    }
+  };
+
+  // Supprimer une recette
+  const deleteRecipe = async (id: number): Promise<void> => {
+    try {
+      setDeletingRecipe(true);
+      setError('');
+
+      console.log('🗑️ Suppression de la recette:', id);
+      await recipeService.deleteRecipe(id);
+
+      // Mettre à jour la liste localement
+      setRecipes(prev => prev.filter(recipe => recipe.id !== id));
+      notificationService.success('Recette supprimée avec succès');
+
+    } catch (err) {
+      console.error('❌ Erreur suppression recette:', err);
+      const errorMessage = err instanceof Error ? err.message : 'Erreur lors de la suppression de la recette';
+      setError(errorMessage);
+      notificationService.error(errorMessage);
+      throw err;
+    } finally {
+      setDeletingRecipe(false);
     }
   };
 
@@ -178,9 +205,9 @@ export const useRecipes = (): UseRecipesReturn => {
       setCreatingProduction(true);
       setError('');
 
-      ;
+      console.log('🏭 Création d\'un lot de production:', data);
       const newBatch = await recipeService.createProductionBatch(data);
-      ;
+      console.log('✅ Lot de production créé:', newBatch);
 
       setProductionBatches(prev => [newBatch, ...prev]);
       notificationService.success('Lot de production créé avec succès');
@@ -233,7 +260,9 @@ export const useRecipes = (): UseRecipesReturn => {
     error,
     creatingRecipe,
     creatingProduction,
+    deletingRecipe,
     createRecipe,
+    deleteRecipe,
     getRecipeById,
     refreshRecipes,
     createProductionBatch,
