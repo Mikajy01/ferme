@@ -126,19 +126,17 @@ export const unitService = {
     return await response.json();
   },
 
-  create: async (data: CreateUnitDto): Promise<Unit> => { // <- Doit accepter CreateUnitDto
+  create: async (data: CreateUnitDto): Promise<Unit> => {
     try {
       const response = await fetchWithAuth(`${API_BASE_URL}/units`, {
         method: 'POST',
         body: JSON.stringify(data)
       });
 
-      // Accepter 201 comme succès
       if (response.status === 201) {
         return await response.json();
       }
 
-      // Gérer les autres statuts
       const errorText = await response.text();
       throw new Error(`Erreur ${response.status}: ${errorText || 'Erreur lors de la création'}`);
       
@@ -147,62 +145,65 @@ export const unitService = {
       throw error;
     }
   },
+
+  // Nouvelle fonction pour supprimer une unité
+  delete: async (id: number): Promise<void> => {
+    try {
+      const response = await fetchWithAuth(`${API_BASE_URL}/units/${id}`, {
+        method: 'DELETE',
+      });
+
+      if (response.status === 200) {
+        return;
+      }
+
+      const errorText = await response.text();
+      throw new Error(`Erreur ${response.status}: ${errorText || 'Erreur lors de la suppression de l\'unité'}`);
+    } catch (error) {
+      console.error('❌ Erreur suppression unité:', error);
+      throw error;
+    }
+  }
 };
 
-// Service des Produits
+// Service des Produits (inchangé)
 export const productService = {
-  // Dans productService.ts, modifiez la méthode getAll :
+  getAll: async (filters: ProductsFilters = {}): Promise<ProductsResponse> => {
+    const queryParams = new URLSearchParams();
+    
+    if (filters.category && filters.category !== 'Tous') {
+      queryParams.append('category', filters.category);
+    }
+    
+    if (filters.search && filters.search.trim() !== '') {
+      queryParams.append('search', filters.search.trim());
+    }
 
-getAll: async (filters: ProductsFilters = {}): Promise<ProductsResponse> => {
-  const queryParams = new URLSearchParams();
-  
-  if (filters.category && filters.category !== 'Tous') {
-    queryParams.append('category', filters.category);
-  }
-  
-  if (filters.search && filters.search.trim() !== '') {
-    queryParams.append('search', filters.search.trim());
-  }
-  
-  // Supprimez page et limit si votre API ne les supporte pas
-  // if (filters.page) {
-  //   queryParams.append('page', filters.page.toString());
-  // }
-  
-  // if (filters.limit) {
-  //   queryParams.append('limit', filters.limit.toString());
-  // }
-
-  const queryString = queryParams.toString();
-  const url = queryString ? `${API_BASE_URL}/products?${queryString}` : `${API_BASE_URL}/products`;
-  
-  ;
-  const response = await fetchWithAuth(url);
-  const responseData = await response.json();
-  
-  ;
-  
-  // Votre API retourne directement un tableau
-  if (Array.isArray(responseData)) {
+    const queryString = queryParams.toString();
+    const url = queryString ? `${API_BASE_URL}/products?${queryString}` : `${API_BASE_URL}/products`;
+    
+    const response = await fetchWithAuth(url);
+    const responseData = await response.json();
+    
+    if (Array.isArray(responseData)) {
+      return {
+        page: 1,
+        limit: 20,
+        total: responseData.length,
+        totalPages: 1,
+        data: responseData
+      };
+    }
+    
+    console.warn('Format de réponse inattendu:', responseData);
     return {
       page: 1,
       limit: 20,
-      total: responseData.length,
+      total: 0,
       totalPages: 1,
-      data: responseData
+      data: []
     };
-  }
-  
-  // Si ce n'est pas un tableau, retourner une structure vide
-  console.warn('Format de réponse inattendu:', responseData);
-  return {
-    page: 1,
-    limit: 20,
-    total: 0,
-    totalPages: 1,
-    data: []
-  };
-},
+  },
 
   getById: async (id: number): Promise<Product> => {
     const response = await fetchWithAuth(`${API_BASE_URL}/products/${id}`);
@@ -257,7 +258,6 @@ getAll: async (filters: ProductsFilters = {}): Promise<ProductsResponse> => {
       const response = await fetchWithAuth(`${API_BASE_URL}/products/dashboard/stats`);
       
       if (response.status === 404) {
-        // Retourner des stats par défaut si l'endpoint n'existe pas
         console.warn('Endpoint /dashboard/stats non trouvé, utilisation des valeurs par défaut');
         return {
           totalProducts: 0,
@@ -270,7 +270,6 @@ getAll: async (filters: ProductsFilters = {}): Promise<ProductsResponse> => {
       return await response.json();
     } catch (error) {
       console.error('Erreur récupération stats dashboard:', error);
-      // Retourner des valeurs par défaut en cas d'erreur
       return {
         totalProducts: 0,
         totalValue: 0,
