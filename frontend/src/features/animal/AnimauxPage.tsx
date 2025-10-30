@@ -15,11 +15,15 @@ import {
   ChevronUp,
   Filter,
   X,
-  ArrowUp
+  ArrowUp,
+  DollarSign
 } from 'lucide-react';
 import { toast } from 'react-toastify';
 import Sidebar from '../../components/Sidebar';
 import { useAnimals } from '../../hooks/useAnimals';
+
+// Définir le type des événements d'animal
+type AnimalEventType = 'feed' | 'vaccination' | 'health' | 'other' | 'sale';
 
 const AnimauxPage: React.FC = () => {
   const {
@@ -29,24 +33,27 @@ const AnimauxPage: React.FC = () => {
     creating,
     updating,
     feeding,
-    createAnimal, // AJOUT: Fonction pour créer un animal
+    createAnimal,
     updateAnimal,
     feedAnimals,
     createAnimalEvent,
+    refreshAnimals, // AJOUT: Import de la fonction de rafraîchissement
   } = useAnimals();
 
-  // CORRECTION: Déclaration correcte de l'état pour afficher le modal
   const [showAddAnimal, setShowAddAnimal] = useState(false);
   const [showFeedAnimals, setShowFeedAnimals] = useState(false);
   const [showAddEvent, setShowAddEvent] = useState(false);
   const [showEditAnimal, setShowEditAnimal] = useState(false);
+  const [showSellAnimal, setShowSellAnimal] = useState(false);
   const [expandedEvents, setExpandedEvents] = useState<number[]>([]);
   const [expandedCards, setExpandedCards] = useState<number[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'sold' | 'deceased'>('active');
   const [showScrollToTop, setShowScrollToTop] = useState(false);
   
-  // CORRECTION: État pour le nouvel animal
+  // État pour forcer le re-rendu après une vente
+  const [refreshKey, setRefreshKey] = useState(0);
+  
   const [newAnimal, setNewAnimal] = useState({
     tag: '',
     species: '',
@@ -64,6 +71,15 @@ const AnimauxPage: React.FC = () => {
     status: 'active' as 'active' | 'sold' | 'deceased'
   });
 
+  const [sellAnimal, setSellAnimal] = useState({
+    id: 0,
+    tag: '',
+    species: '',
+    sellPrice: 0,
+    date: new Date().toISOString().split('T')[0],
+    note: ''
+  });
+
   const [feedData, setFeedData] = useState({
     batchId: 0,
     quantity: 0,
@@ -73,7 +89,7 @@ const AnimauxPage: React.FC = () => {
 
   const [newEvent, setNewEvent] = useState({
     animalId: 0,
-    type: 'vaccination' as 'feed' | 'vaccination' | 'health' | 'other',
+    type: 'vaccination' as AnimalEventType,
     date: new Date().toISOString().split('T')[0],
     note: '',
     cost: 0
@@ -85,7 +101,6 @@ const AnimauxPage: React.FC = () => {
       const contentElement = document.getElementById('main-content');
       if (contentElement) {
         const scrollTop = contentElement.scrollTop;
-        // Afficher le bouton retour en haut seulement sur mobile et après un certain scroll
         const isMobile = window.innerWidth < 768;
         setShowScrollToTop(isMobile && scrollTop > 500);
       }
@@ -128,7 +143,6 @@ const AnimauxPage: React.FC = () => {
     batch.product?.category === 'FEED' && parseFloat(batch.remaining) > 0
   );
 
-  // AJOUT: Fonction pour créer un nouvel animal
   const handleAddAnimal = async () => {
     if (!newAnimal.tag.trim() || !newAnimal.species.trim()) {
       toast.error('Veuillez remplir tous les champs obligatoires');
@@ -144,7 +158,6 @@ const AnimauxPage: React.FC = () => {
         status: newAnimal.status
       });
       
-      // Réinitialiser le formulaire
       setNewAnimal({
         tag: '',
         species: '',
@@ -177,6 +190,50 @@ const AnimauxPage: React.FC = () => {
       toast.success('Animal modifié avec succès');
     } catch (error) {
       toast.error('Erreur lors de la modification de l\'animal');
+    }
+  };
+
+  // FONCTION CORRIGÉE: Vendre un animal avec rafraîchissement
+  const handleSellAnimal = async () => {
+    if (sellAnimal.sellPrice <= 0) {
+      toast.error('Veuillez saisir un prix de vente valide');
+      return;
+    }
+
+    try {
+      // 1. Créer l'événement de vente
+      await createAnimalEvent({
+        animalId: sellAnimal.id,
+        type: 'sale',
+        date: new Date(sellAnimal.date).toISOString(),
+        note: sellAnimal.note || `Vente de l'animal ${sellAnimal.tag}`,
+        cost: -sellAnimal.sellPrice // Coût négatif pour indiquer un revenu
+      });
+
+      // 2. FORCER LE RAFRAÎCHISSEMENT DES DONNÉES
+      // Attendre un peu pour que la base de données se mette à jour
+      setTimeout(async () => {
+        try {
+          await refreshAnimals(); // Rafraîchir les données depuis l'API
+          setRefreshKey(prev => prev + 1); // Forcer le re-rendu du composant
+        } catch (error) {
+          console.error('Erreur lors du rafraîchissement:', error);
+        }
+      }, 500);
+
+      setShowSellAnimal(false);
+      setSellAnimal({
+        id: 0,
+        tag: '',
+        species: '',
+        sellPrice: 0,
+        date: new Date().toISOString().split('T')[0],
+        note: ''
+      });
+      toast.success('Animal vendu avec succès');
+    } catch (error) {
+      console.error('Erreur vente animal:', error);
+      toast.error('Erreur lors de la vente de l\'animal');
     }
   };
 
@@ -223,7 +280,7 @@ const AnimauxPage: React.FC = () => {
       toast.error('Veuillez saisir une description');
       return;
     }
-    if (newEvent.cost < 0) {
+    if (newEvent.cost < 0 && newEvent.type !== 'sale') {
       toast.error('Le coût ne peut pas être négatif');
       return;
     }
@@ -287,20 +344,35 @@ const AnimauxPage: React.FC = () => {
     setShowEditAnimal(true);
   };
 
-  const getEventTypeIcon = (type: string) => {
+  // FONCTION: Ouvrir le modal de vente
+  const openSellModal = (animal: any) => {
+    setSellAnimal({
+      id: animal.id,
+      tag: animal.tag,
+      species: animal.species,
+      sellPrice: 0,
+      date: new Date().toISOString().split('T')[0],
+      note: ''
+    });
+    setShowSellAnimal(true);
+  };
+
+  const getEventTypeIcon = (type: AnimalEventType) => {
     switch (type) {
       case 'feed': return <Utensils size={16} />;
       case 'vaccination': return <Stethoscope size={16} />;
       case 'health': return <Heart size={16} />;
+      case 'sale': return <DollarSign size={16} />;
       default: return <MoreHorizontal size={16} />;
     }
   };
 
-  const getEventTypeLabel = (type: string) => {
-    const labels: Record<string, string> = {
+  const getEventTypeLabel = (type: AnimalEventType) => {
+    const labels: Record<AnimalEventType, string> = {
       'feed': 'Nourrissage',
       'vaccination': 'Vaccination',
       'health': 'Soin santé',
+      'sale': 'Vente',
       'other': 'Autre'
     };
     return labels[type] || type;
@@ -324,9 +396,22 @@ const AnimauxPage: React.FC = () => {
     return colors[status] || 'bg-gray-100 text-gray-700';
   };
 
-  // Vérifier si l'animal peut être modifié (seulement les actifs)
+  // Vérifier si l'animal peut être modifié ou vendu (seulement les actifs)
   const canEditAnimal = (animal: any) => {
     return animal.status === 'active';
+  };
+
+  // Calculer le bénéfice/pertes pour un animal vendu
+  const calculateProfit = (animal: any) => {
+    const buyPrice = parseFloat(animal.buyPrice);
+    const saleEvent = animal.events?.find((event: any) => event.type === 'sale');
+    
+    if (saleEvent) {
+      const sellPrice = Math.abs(parseFloat(saleEvent.cost)); // Coût négatif dans l'événement
+      const profit = sellPrice - buyPrice;
+      return profit;
+    }
+    return 0;
   };
 
   if (loading && animals.length === 0) {
@@ -344,7 +429,7 @@ const AnimauxPage: React.FC = () => {
   }
 
   return (
-    <div className="flex min-h-screen bg-[var(--color-background)]">
+    <div className="flex min-h-screen bg-[var(--color-background)]" key={refreshKey}> {/* AJOUT: key pour forcer le re-rendu */}
       <Sidebar />
       
       {/* Container principal avec header et barre d'actions fixes */}
@@ -457,6 +542,8 @@ const AnimauxPage: React.FC = () => {
               const displayedEvents = isEventsExpanded ? events : events.slice(0, 2);
               const hasMoreEvents = events.length > 2;
               const isEditable = canEditAnimal(animal);
+              const profit = calculateProfit(animal);
+              const hasBeenSold = animal.status === 'sold';
 
               // Version mobile compacte
               if (window.innerWidth < 640 && !isExpanded) {
@@ -488,6 +575,16 @@ const AnimauxPage: React.FC = () => {
                           <p className="font-medium text-red-600">{(animal.totalExpenses || 0).toLocaleString()} Ar</p>
                         </div>
                       </div>
+
+                      {/* Affichage du bénéfice si vendu */}
+                      {hasBeenSold && (
+                        <div className="mt-2">
+                          <p className={`text-xs font-medium ${profit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                            {profit >= 0 ? '✓ Bénéfice: ' : '✗ Perte: '}
+                            {Math.abs(profit).toLocaleString()} Ar
+                          </p>
+                        </div>
+                      )}
                       
                       <div className="mt-2 flex justify-between items-center">
                         <span className="text-xs text-gray-500">
@@ -525,6 +622,19 @@ const AnimauxPage: React.FC = () => {
                         <p className="font-medium truncate">{parseFloat(animal.buyPrice).toLocaleString()} Ar</p>
                       </div>
                     </div>
+
+                    {/* Affichage du bénéfice si vendu */}
+                    {hasBeenSold && (
+                      <div className="mt-3 p-2 bg-gray-50 rounded-lg">
+                        <div className="flex justify-between items-center">
+                          <span className="text-xs font-medium text-gray-600">Résultat:</span>
+                          <span className={`text-sm font-bold ${profit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                            {profit >= 0 ? '✓ Bénéfice: ' : '✗ Perte: '}
+                            {Math.abs(profit).toLocaleString()} Ar
+                          </span>
+                        </div>
+                      </div>
+                    )}
                   </div>
 
                   {/* Dépenses totales */}
@@ -568,13 +678,17 @@ const AnimauxPage: React.FC = () => {
                     </div>
 
                     <div className="space-y-2 max-h-32 sm:max-h-48 overflow-y-auto">
-                      {displayedEvents.map((event) => (
+                      {displayedEvents.map((event: any) => (
                         <div key={event.id} className="flex items-center gap-2 sm:gap-3 p-2 bg-gray-50 rounded-lg">
-                          <div className="text-[var(--color-primary)] flex-shrink-0">
-                            {getEventTypeIcon(event.type)}
+                          <div className={`flex-shrink-0 ${
+                            event.type === 'sale' ? 'text-green-600' : 'text-[var(--color-primary)]'
+                          }`}>
+                            {getEventTypeIcon(event.type as AnimalEventType)}
                           </div>
                           <div className="flex-1 min-w-0">
-                            <p className="text-xs sm:text-sm font-medium truncate">{getEventTypeLabel(event.type)}</p>
+                            <p className="text-xs sm:text-sm font-medium truncate">
+                              {getEventTypeLabel(event.type as AnimalEventType)}
+                            </p>
                             <p className="text-xs text-gray-600 truncate">
                               {event.note}
                             </p>
@@ -582,8 +696,10 @@ const AnimauxPage: React.FC = () => {
                               {new Date(event.date).toLocaleDateString('fr-FR')}
                             </p>
                           </div>
-                          <span className="text-xs font-medium text-red-600 whitespace-nowrap flex-shrink-0">
-                            {parseFloat(event.cost).toLocaleString()} Ar
+                          <span className={`text-xs font-medium whitespace-nowrap flex-shrink-0 ${
+                            event.type === 'sale' ? 'text-green-600' : 'text-red-600'
+                          }`}>
+                            {event.type === 'sale' ? '+' : ''}{parseFloat(event.cost).toLocaleString()} Ar
                           </span>
                         </div>
                       ))}
@@ -597,45 +713,54 @@ const AnimauxPage: React.FC = () => {
 
                     {/* Actions */}
                     <div className="flex gap-2 mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-gray-200">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setNewEvent({
-                            animalId: animal.id,
-                            type: 'vaccination',
-                            date: new Date().toISOString().split('T')[0],
-                            note: '',
-                            cost: 0
-                          });
-                          setShowAddEvent(true);
-                        }}
-                        className={`flex-1 py-2 rounded-lg text-xs sm:text-sm transition-colors ${
-                          isEditable 
-                            ? 'bg-[var(--color-primary)] text-white hover:bg-green-600' 
-                            : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                        }`}
-                        disabled={!isEditable}
-                      >
-                        Ajouter Événement
-                      </button>
-                      
-                      <button 
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          if (isEditable) {
-                            openEditModal(animal);
-                          }
-                        }}
-                        className={`p-2 rounded-lg transition-colors flex-shrink-0 ${
-                          isEditable 
-                            ? 'hover:bg-gray-100 text-[var(--color-primary)]' 
-                            : 'text-gray-300 cursor-not-allowed'
-                        }`}
-                        disabled={!isEditable}
-                        title={!isEditable ? "Modification non autorisée pour cet animal" : "Modifier l'animal"}
-                      >
-                        <Edit2 size={14} />
-                      </button>
+                      {isEditable ? (
+                        <>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setNewEvent({
+                                animalId: animal.id,
+                                type: 'vaccination',
+                                date: new Date().toISOString().split('T')[0],
+                                note: '',
+                                cost: 0
+                              });
+                              setShowAddEvent(true);
+                            }}
+                            className="flex-1 py-2 rounded-lg text-xs sm:text-sm bg-[var(--color-primary)] text-white hover:bg-green-600 transition-colors"
+                          >
+                            Événement
+                          </button>
+                          
+                          <button 
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              openSellModal(animal);
+                            }}
+                            className="flex-1 py-2 rounded-lg text-xs sm:text-sm bg-green-600 text-white hover:bg-green-700 transition-colors flex items-center justify-center gap-1"
+                          >
+                            <DollarSign size={12} />
+                            Vendre
+                          </button>
+                          
+                          <button 
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              openEditModal(animal);
+                            }}
+                            className="p-2 hover:bg-gray-100 rounded-lg transition-colors flex-shrink-0 text-[var(--color-primary)]"
+                            title="Modifier l'animal"
+                          >
+                            <Edit2 size={14} />
+                          </button>
+                        </>
+                      ) : (
+                        <div className="flex-1 text-center">
+                          <span className="text-xs text-gray-500">
+                            {animal.status === 'sold' ? 'Animal vendu' : 'Animal décédé'}
+                          </span>
+                        </div>
+                      )}
                       
                       {/* Bouton pour réduire sur mobile */}
                       {window.innerWidth < 640 && (
@@ -682,7 +807,7 @@ const AnimauxPage: React.FC = () => {
         )}
       </div>
 
-      {/* AJOUT: Modal Nouvel Animal */}
+      {/* Modal Nouvel Animal */}
       {showAddAnimal && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg max-w-md w-full max-h-[90vh] overflow-y-auto shadow-2xl">
@@ -762,6 +887,89 @@ const AnimauxPage: React.FC = () => {
                   disabled={creating}
                 >
                   {creating ? <Loader className="animate-spin mx-auto" size={18} /> : 'Créer'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Vendre Animal */}
+      {showSellAnimal && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg max-w-md w-full max-h-[90vh] overflow-y-auto shadow-2xl">
+            <div className="p-6">
+              <h2 className="text-2xl mb-6 text-gray-900 font-bold">Vendre l'Animal</h2>
+              
+              <div className="space-y-4">
+
+                <div>
+                  <label className="block mb-2 text-gray-700">Prix de vente (Ar) *</label>
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+                    value={sellAnimal.sellPrice}
+                    onChange={(e) => setSellAnimal({...sellAnimal, sellPrice: parseFloat(e.target.value)})}
+                    placeholder="Prix de vente"
+                  />
+                </div>
+
+                <div>
+                  <label className="block mb-2 text-gray-700">Date de vente *</label>
+                  <input
+                    type="date"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+                    value={sellAnimal.date}
+                    onChange={(e) => setSellAnimal({...sellAnimal, date: e.target.value})}
+                  />
+                </div>
+
+                <div>
+                  <label className="block mb-2 text-gray-700">Notes (optionnel)</label>
+                  <textarea
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+                    value={sellAnimal.note}
+                    onChange={(e) => setSellAnimal({...sellAnimal, note: e.target.value})}
+                    placeholder="Notes sur la vente..."
+                    rows={3}
+                  />
+                </div>
+
+                {/* Résumé de la vente */}
+                {sellAnimal.sellPrice > 0 && (
+                  <div className="bg-green-50 p-4 rounded-lg">
+                    <div className="flex justify-between items-center">
+                      <span className="text-green-700 font-medium">Revenu de vente:</span>
+                      <span className="text-green-700 font-bold text-lg">
+                        +{sellAnimal.sellPrice.toLocaleString()} Ar
+                      </span>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div className="flex gap-3 mt-6">
+                <button
+                  onClick={() => setShowSellAnimal(false)}
+                  className="flex-1 py-3 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors"
+                >
+                  Annuler
+                </button>
+                <button
+                  onClick={handleSellAnimal}
+                  className="flex-1 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                  disabled={updating || sellAnimal.sellPrice <= 0}
+                >
+                  {updating ? (
+                    <Loader className="animate-spin" size={18} />
+                  ) : (
+                    <>
+                      <DollarSign size={18} />
+                      Vendre
+                    </>
+                  )}
                 </button>
               </div>
             </div>
@@ -884,7 +1092,7 @@ const AnimauxPage: React.FC = () => {
                     onChange={(e) => setNewEvent({...newEvent, animalId: parseInt(e.target.value)})}
                   >
                     <option value={0}>Sélectionner un animal</option>
-                    {animals.map(animal => (
+                    {animals.filter(a => a.status === 'active').map(animal => (
                       <option key={animal.id} value={animal.id}>
                         {animal.tag} ({animal.species})
                       </option>
@@ -897,7 +1105,7 @@ const AnimauxPage: React.FC = () => {
                   <select
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
                     value={newEvent.type}
-                    onChange={(e) => setNewEvent({...newEvent, type: e.target.value as any})}
+                    onChange={(e) => setNewEvent({...newEvent, type: e.target.value as AnimalEventType})}
                   >
                     <option value="vaccination">Vaccination</option>
                     <option value="health">Soin santé</option>

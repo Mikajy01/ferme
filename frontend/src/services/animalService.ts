@@ -32,7 +32,7 @@ export interface CreateAnimalDto {
 
 export interface CreateAnimalEventDto {
   animalId: number;
-  type: 'feed' | 'vaccination' | 'health' | 'other';
+  type: 'feed' | 'vaccination' | 'health' | 'other' | 'sale';
   date: string;
   note: string;
   cost: number;

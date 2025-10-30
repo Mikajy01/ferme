@@ -35,6 +35,8 @@ export const useAnimals = (): UseAnimalsReturn => {
   const [creating, setCreating] = useState(false);
   const [updating, setUpdating] = useState(false);
   const [feeding, setFeeding] = useState(false);
+  
+  
 
   // Charger les animaux
   const loadAnimals = useCallback(async () => {
@@ -135,13 +137,12 @@ export const useAnimals = (): UseAnimalsReturn => {
   };
 
   // Nourrir des animaux
-  const feedAnimals = async (data: FeedAnimalsDto): Promise<void> => {
+  const feedAnimals = async (): Promise<void> => {
     try {
       setFeeding(true);
       setError('');
       
       ;
-      const result = await animalService.feed(data);
       ;
       
       // Recharger les animaux pour mettre à jour les événements
