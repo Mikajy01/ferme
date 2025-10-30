@@ -1,4 +1,9 @@
-import { ForbiddenException, Inject, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { IAnimalRepository } from '../interfaces/animal-repository.interface';
 import { IAnimalEventRepository } from '../interfaces/animal-event-repository.interface';
 import { CreateAnimalDto } from '../dto/create-animal.dto';
@@ -18,20 +23,20 @@ export class AnimalsService {
   ) {}
 
   async findAll(status?: string) {
-  const animals = await this.animalRepository.findAll(status);
-  return animals.map((animal) => {
-    const totalExpenses = animal.events.reduce((sum, event) => {
-      const cost = Number(event.cost) || 0;
-      return sum + cost;
-    }, 0) + +animal.buyPrice!;
+    const animals = await this.animalRepository.findAll(status);
+    return animals.map((animal) => {
+      const totalExpenses =
+        animal.events.reduce((sum, event) => {
+          const cost = Number(event.cost) || 0;
+          return sum + cost;
+        }, 0) + +animal.buyPrice!;
 
-    return {
-      ...animal,
-      totalExpenses,
-    };
-  });
-}
-
+      return {
+        ...animal,
+        totalExpenses,
+      };
+    });
+  }
 
   async findOne(id: number) {
     const animal = await this.animalRepository.findById(id);
@@ -45,7 +50,9 @@ export class AnimalsService {
     return this.animalRepository.create({
       tag: createAnimalDto.tag,
       species: createAnimalDto.species,
-      birthDate: createAnimalDto.birthDate ? new Date(createAnimalDto.birthDate).toISOString() : new Date().toISOString(),
+      birthDate: createAnimalDto.birthDate
+        ? new Date(createAnimalDto.birthDate).toISOString()
+        : new Date().toISOString(),
       buyPrice: createAnimalDto.buyPrice,
       status: createAnimalDto.status || 'alive',
     });
@@ -78,19 +85,34 @@ export class AnimalsService {
       const event = await tx.animalEventRepository.create(createEventDto);
 
       if (createEventDto.type === 'sale' || createEventDto.type === 'death') {
-        await tx.animalRepository.update(createEventDto.animalId,{ status: createEventDto.type === 'sale' ? 'sold' : 'dead' });
+        await tx.animalRepository.update(createEventDto.animalId, {
+          status: createEventDto.type === 'sale' ? 'sold' : 'dead',
+        });
       }
 
-      if (createEventDto.cost && createEventDto.cost > 0) {
+      // Gestion des finances
+      if (
+        createEventDto.type === 'sale' &&
+        createEventDto.cost &&
+        createEventDto.cost > 0
+      ) {
         await tx.financialRepository.create({
-            type: 'EXPENSE',
-            amount: createEventDto.cost,
-            date: createEventDto.date
-              ? new Date(createEventDto.date)
-              : new Date(),
-            note: `${createEventDto.type} - Animal ${event.animal.tag || event.animalId}`,
-          },
-        );
+          type: 'INCOME',
+          amount: createEventDto.cost,
+          date: createEventDto.date
+            ? new Date(createEventDto.date)
+            : new Date(),
+          note: `Sale - Animal ${event.animal.tag || event.animalId}`,
+        });
+      } else if (createEventDto.cost && createEventDto.cost > 0) {
+        await tx.financialRepository.create({
+          type: 'EXPENSE',
+          amount: createEventDto.cost,
+          date: createEventDto.date
+            ? new Date(createEventDto.date)
+            : new Date(),
+          note: `${createEventDto.type} - Animal ${event.animal.tag || event.animalId}`,
+        });
       }
 
       return event;
@@ -111,7 +133,7 @@ export class AnimalsService {
       // 2️⃣ Vérifier le stock restant
       if (batch.remaining < quantity) {
         throw new ForbiddenException(
-          `Stock insuffisant pour le batch ${batchId}. Disponible: ${batch.remaining}, demandé: ${quantity}`
+          `Stock insuffisant pour le batch ${batchId}. Disponible: ${batch.remaining}, demandé: ${quantity}`,
         );
       }
 
@@ -120,34 +142,35 @@ export class AnimalsService {
 
       // 4️⃣ Créer le mouvement de stock global (OUT)
       const movement = await tx.inventoryRepository.createMovement({
-          type: 'OUT',
-          productId: batch.productId,
-          batchId: batch.id,
-          quantity,
-          date: date ? new Date(date) : new Date(),
-          reference: `feed:${batchId}`,
-          note: `Distribution d’aliment à ${animals.length} animaux`,
-        
+        type: 'OUT',
+        productId: batch.productId,
+        batchId: batch.id,
+        quantity,
+        date: date ? new Date(date) : new Date(),
+        reference: `feed:${batchId}`,
+        note: `Distribution d’aliment à ${animals.length} animaux`,
       });
 
       // 5️⃣ Créer un événement pour chaque animal et lier au mouvement
       const animalEvents = await Promise.all(
         animals.map(async (animalId) =>
           tx.animalEventRepository.create({
-              animalId,
-              type: 'feed',
-              date: date ? new Date(date).toISOString() : new Date().toISOString(),
-              note: `Nourri avec ${quantityPerAnimal} ${batch.product.name}`,
-              cost: quantityPerAnimal * batch.unitPrice,
-              inventoryMovementId: movement.id, // 🔗 lien ajouté
-            
+            animalId,
+            type: 'feed',
+            date: date
+              ? new Date(date).toISOString()
+              : new Date().toISOString(),
+            note: `Nourri avec ${quantityPerAnimal} ${batch.product.name}`,
+            cost: quantityPerAnimal * batch.unitPrice,
+            inventoryMovementId: movement.id, // 🔗 lien ajouté
           }),
         ),
       );
 
       // 6️⃣ Mettre à jour le batch (décrément du stock restant)
-      await tx.batchRepository.updateRemaining(batch.id,
-         batch.remaining - quantity
+      await tx.batchRepository.updateRemaining(
+        batch.id,
+        batch.remaining - quantity,
       );
 
       return {
